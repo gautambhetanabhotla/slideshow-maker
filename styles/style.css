@@ -1,0 +1,48 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  
+}
+.heading
+{
+    color: rgb(13, 13, 13);
+    font-family: cursive;
+    text-align: center;
+}
+.uploadimages {
+    
+    font-family: 'Times New Roman', Times, serif;
+    background-color: beige;
+    margin-left: 24%;
+    padding: 4%;
+    border: 2px solid rgba(0, 0, 0,0.3);
+    text-align: center;
+    width: 50%;
+
+}
+h2 
+{
+    padding: 1%;
+    text-align: center;
+}
+.file-upload-input
+{
+    border: 2px solid rgba(0, 0, 0,0.3);
+    padding: 2%;
+    background-color: white;
+}
+.preview
+{
+    width: 58%;
+    margin-left: 24%;
+
+    background-color: beige;
+    text-align: center;
+}
+.grid-container-preview {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    background-color: #2196F3;
+    padding: 10px;
+  }
