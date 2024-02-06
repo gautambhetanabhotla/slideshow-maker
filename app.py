@@ -22,7 +22,7 @@ def home():
 	return render_template("home.html")
 
 @app.route("/requestlogin", methods = ['POST'])
-def processrequest():
+def processloginrequest():
 	if request.method == 'POST':
 		username = request.form["username"]
 		password = request.form["password"]
