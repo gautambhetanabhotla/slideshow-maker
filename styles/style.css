@@ -3,12 +3,16 @@
     padding: 0;
     border: 0;
   
+  
+  
 }
 .heading
 {
     color: rgb(13, 13, 13);
-    font-family: cursive;
+    font-family: 'Times New Roman', Times, serif;
     text-align: center;
+    font-size: 60px;
+    color: rgb(222, 160, 26);
 }
 .uploadimages {
     
@@ -17,6 +21,7 @@
     margin-left: 24%;
     padding: 4%;
     border: 2px solid rgba(0, 0, 0,0.3);
+   
     text-align: center;
     width: 50%;
 
@@ -32,7 +37,7 @@ h2
     padding: 2%;
     background-color: white;
 }
-.preview
+.image-selection
 {
     width: 58%;
     margin-left: 24%;
@@ -43,6 +48,46 @@ h2
 .grid-container-preview {
     display: grid;
     grid-template-columns: 33% 33% 33%;
-    background-color: #2196F3;
+    background-color:beige;
     padding: 10px;
   }
+.audio
+{
+    padding: 2%;
+    text-align: center;
+
+}
+.audio-selection
+{
+    padding: 2%;
+    margin-left: 35%;
+    
+    
+}
+.music_selection_button
+{
+    padding: 1%;
+    background-color: red;
+    font-weight: bolder;
+}
+.audio-file-selection
+{
+    background-color: beige;
+    width: 50%;
+    margin-left: 30%;
+}
+.finalvideo
+{
+    width: 600px;
+    height: 400px;
+    margin-left: 30%;
+}
+.output_settings
+{
+    text-align: center;
+}
+.extract
+{
+    text-align: center;
+    padding: 2%;
+}
