@@ -1,17 +1,16 @@
 body{
-    /* background-image: url(../images/root-wallpaper.png); */
-    /* background-repeat: repeat-x; */
-    /* background-size:50%; */
+    background-image: linear-gradient(#51e2f5,#9df9ef, rgb(220, 220, 15)    ,#ffa8B6,#a28089);
     margin: 0;
     padding: 0;
     font-size: 2vw;
     color: white;
 }
 
+
 .intro{
-    font-family: cursive;
+    font-family: 'Protest Riot', sans-serif;;
     font-size: 5vw;
-    color:wheat;
+    color:black;
 }
 
 .full-page{
@@ -33,9 +32,15 @@ body{
 button{
     width: 10vw;
     height: 3vw;
-    background-color:chocolate;
+    /* background-color:rgb(90, 210, 30); */
+    background-color:wheat;
     font-size: 1.3vw;
     font-family: 'Protest Riot', sans-serif;
     font-weight: 800;
     border-radius: 20px;
+    cursor: pointer;
+}
+
+button:hover{
+    background-color:rgb(30, 99, 210);
 }
