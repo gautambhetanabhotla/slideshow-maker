@@ -1,10 +1,28 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Slideshow Maker</title>
-    </head>
-    <body>
-        <button onclick="window.location.href='/login'">Log in</button>
-        <button onclick="window.location.href='/signup'">Sign up</button>
-    </body>
+
+<head>
+    <title>Slideshow Maker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Protest+Riot&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/root.css') }}">
+</head>
+
+<body>
+    <div class="full-page">
+        <div>
+            <p class="intro">Welcome to Slideshow Maker</p>
+        </div>
+        <div class="credentials">
+            <div>
+                <button onclick="window.location.href='/login'">Log in</button>
+            </div>
+            <div>
+                <button onclick="window.location.href='/signup'">Sign up</button>
+            </div>
+        </div>
+    </div>
+</body>
+
 </html>
