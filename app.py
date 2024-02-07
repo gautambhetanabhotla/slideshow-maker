@@ -28,7 +28,10 @@ def processloginrequest():
 		password = request.form["password"]
 		for user in users:
 			if user["username"] == username and user["password"] == password:
-				return redirect("/home", 301)
+				if username != "admin":
+					return redirect("/home", 301)
+				else:
+					return redirect("/admin", 301)
 		else:
 			return redirect("/login", 301)
 		
@@ -44,6 +47,10 @@ def processsignuprequest():
 			users.append({"username": username, "password": password})
 			json.dump(users, open("data/users.json", "w"))
 			return redirect("/login", 301)
+
+@app.route("/admin")
+def admin():
+	return users
 
 if __name__ == "__main__":
 	app.run(debug = True)
