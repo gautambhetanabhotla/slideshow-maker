@@ -1,0 +1,41 @@
+body{
+    /* background-image: url(../images/root-wallpaper.png); */
+    /* background-repeat: repeat-x; */
+    /* background-size:50%; */
+    margin: 0;
+    padding: 0;
+    font-size: 2vw;
+    color: white;
+}
+
+.intro{
+    font-family: cursive;
+    font-size: 5vw;
+    color:wheat;
+}
+
+.full-page{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+}
+
+.credentials{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 6%;
+}
+
+button{
+    width: 10vw;
+    height: 3vw;
+    background-color:chocolate;
+    font-size: 1.3vw;
+    font-family: 'Protest Riot', sans-serif;
+    font-weight: 800;
+    border-radius: 20px;
+}

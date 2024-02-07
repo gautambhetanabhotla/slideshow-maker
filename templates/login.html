@@ -1,15 +1,43 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Log in</title>
-    </head>
-    <body>
-        <form action = "/requestlogin", method = "POST">
-            <label>Username</label>
-            <input type = "text" name = "username"><br>
-            <label>Password</label>
-            <input type = "password" name = "password"><br>
-            <input type = "submit" value = "Log in">
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="icon"
+        href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYYmU-rYWKpMFpcf1llV2UGXtLOnGmhAu54K-GlOogrg&s">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/login_css.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Protest+Riot&display=swap" rel="stylesheet">
+</head>
+
+
+<body>
+    <div class="page">
+        <form action="/requestlogin" , method="POST">
+            <div class="user_name">
+                <div>
+                    <label>Username: </label>
+                </div>
+                <div>
+                    <input type="text" name="username" placeholder="Enter your Username">
+                </div>
+            </div>
+            <div class="pass">
+                <div>
+                    <label>Password: </label>
+                </div>
+                <div>
+                    <input type="password" name="password" placeholder="Enter your Password">
+                </div>
+            </div>
+            <div>
+                <input type="submit" value="Log in">
+            </div>
         </form>
-    </body>
+    </div>
+</body>
+
 </html>
