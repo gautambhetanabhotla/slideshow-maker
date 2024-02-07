@@ -16,91 +16,17 @@
     </div>
     
     <h2>Create a Video</h2>
-    <button onclick="redirectToVideo()" class="music_selection_button" style="text-align: center;">Watch Video</button>
-
-    <script>
+    <!-- <button onclick="window.location.href = '{{ url_for('static', filename='video.html') }}'" class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">Watch Video</button> -->
+    <!-- <a href="video.html">
+        <button  class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">Create Video</button>
+    </a> -->
+    <button class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">
+        <a href="/video">Create Video</a>
+    </button>
+    <!-- <script>
     function redirectToVideo() {
-        window.location.href = 'video.html';
     }
-    </script>
-    <div class="image-selection">
-        <div class="grid-container-preview">
-            <div class="grid-item1">
-                <img src="{{ url_for('static', filename='images/hardcodep1.jpeg') }}" alt="Description of the image" width="100" height="100">
-            </div>
-            <div class="grid-item1">
-                <img src="{{ url_for('static', filename='images/hardcodep2.jpeg') }}" alt="Description of the image" width="100" height="100">
-            </div>
-            <div class="grid-item1">
-                <img src="{{ url_for('static', filename='images/hardcodep3.jpeg') }}" alt="Description of the image" width="100" height="100">
-            </div>
-            <div class="grid-item1">
-                <img src="{{ url_for('static', filename='images/hardcodep4.jpeg') }}" alt="Description of the image" width="100" height="100">
-            </div>
-            <div class="grid-item1">
-                <img src="{{ url_for('static', filename='images/hardcodep5.jpg') }}" alt="Description of the image" width="100" height="100">
-            </div>
-            <div class="grid-item1">
-                <img src="{{ url_for('static', filename='images/hardcodep6.jpg') }}" alt="Description of the image" width="100" height="100">
-            </div>
-        </div>        
-    </div>
-    <h2>Select an audio file</h2>
-    <div class="audio-file-selection">
-        <div class="audio">
-            <h3>Background music 1</h3>
-            <audio controls loop>
-                <source src="{{ url_for('static', filename='music/Happy_birthday_to_you_MIDI(chosic.com).mp3') }}">  
-            </audio>
-            <br>
-            <h3>Background music 2</h3>
-            <audio controls loop>
-                <source src="{{ url_for('static', filename='/music/Heat-Waves(PagalWorld).mp3') }}">
-            </audio>
-            <br>
-            <h3>Background music 3</h3>
-            <audio controls loop>
-                <source src="{{ url_for('static', filename='music/Zara-Zara-Behekta-Hai-(Female-Version)(PagalWorldl).mp3') }}">
-            </audio>
-            <br>
-            <h3>Background music 4</h3>
-            <audio controls loop>
-                <source src="{{ url_for('static', filename='music/OneRepublic---I-Aint-Worried-(From-Top-Gun_-Maverick)(pagalworld.co.uk).mp3') }}">
-            </audio>
-            <br>
-        </div>
-    </div>
-    <div class="audio-selection">
-        <form action="/action_page.php">
-            <label for="song">Choose an audio file:</label>
-            <select id="song" name="song" style="padding: 1%;">
-                <option value="bgm1">Background music 1</option>
-                <option value="bgm2">Background music 2</option>
-                <option value="bgm3">Background music 3</option>
-                <option value="bgm4">Background music 4</option>
-            </select>
-            <input type="submit" class="music_selection_button">
-        </form>
-    </div>
-    <h2>Video preview</h2>
-    <div class="video-preview">
-        <video controls  loop src="{{ url_for('static', filename='videos/preview.mp4') }}" class="finalvideo"></video>
-    </div>
-    <h2>Select Resolution</h2>
-    <div class="output_settings">
-        <form action="/action_page.php">
-            <label for="song">Choose Resolution:</label>
-            <select id="song" name="song" style="padding: 1%;">
-                <option value="240p">240p</option>
-                <option value="480p">480p</option>
-                <option value="720p">720p</option>
-                <option value="1080p">1080p</option>
-            </select>
-            <input type="submit" class="music_selection_button">
-          </form>
-    </div>
-    <h2>Download Video</h2>
-    <div class="extract">
-        <button class="music_selection_button" >Download</button> 
-    </div> 
+    </script> -->
+  
 </body>
+</html>
