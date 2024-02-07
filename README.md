@@ -8,3 +8,4 @@
 - The home page features the actual functionality of the website. Users can drag and drop image files onto the browser.
 - The web application is currently running on flask.
 - User data is stored in `users.json`.
+- The admin page is not a separate html file, but on logging in as admin, you will be able to see all user details.
