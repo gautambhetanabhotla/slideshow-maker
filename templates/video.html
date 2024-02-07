@@ -1,28 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Existentia Slideshow maker</title>
-    <link rel="stylesheet"  href="{{ url_for('static', filename='styles/style.css') }}">
-</head>
-<body>
-    <h1 class="heading">Slideshow maker</h1>
-    <div class="imagebox">
-        <h2>Upload images here</h2>
-        
-        <div class="uploadimages">
-          
-            <input class="file-upload-input"  type="file" onchange="readURL(this)" accept="Image/*">
-        </div>
-    </div>
     
-    <h2>Create a Video</h2>
-    <button onclick="redirectToVideo()" class="music_selection_button" style="text-align: center;">Watch Video</button>
-
-    <script>
-    function redirectToVideo() {
-        window.location.href = 'video.html';
-    }
-    </script>
+    <title>Video page </title>
+    <link rel="stylesheet"  href="{{ url_for('static', filename='styles/style.css') }}">
+   </head>
+<body>
+    <h1 style="text-align: center;padding: 1%;">Welcome to our video page</h1>
     <div class="image-selection">
         <div class="grid-container-preview">
             <div class="grid-item1">
@@ -36,12 +20,6 @@
             </div>
             <div class="grid-item1">
                 <img src="{{ url_for('static', filename='images/hardcodep4.jpeg') }}" alt="Description of the image" width="100" height="100">
-            </div>
-            <div class="grid-item1">
-                <img src="{{ url_for('static', filename='images/hardcodep5.jpg') }}" alt="Description of the image" width="100" height="100">
-            </div>
-            <div class="grid-item1">
-                <img src="{{ url_for('static', filename='images/hardcodep6.jpg') }}" alt="Description of the image" width="100" height="100">
             </div>
         </div>        
     </div>
@@ -103,4 +81,6 @@
     <div class="extract">
         <button class="music_selection_button" >Download</button> 
     </div> 
+    
 </body>
+</html>
