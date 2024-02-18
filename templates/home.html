@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>Existentia Slideshow maker</title>
-    <link rel="stylesheet"  href="{{ url_for('static', filename='styles/style.css') }}">
-</head>
-<body>
-    <h1 class="heading">Slideshow maker</h1>
-    <div class="imagebox">
-        <h2>Upload images here</h2>
-        
-        <div class="uploadimages">
-          
-            <input class="file-upload-input"  type="file" onchange="readURL(this)" accept="Image/*">
+    <head>
+        <title>Existentia Slideshow maker</title>
+        <link rel="stylesheet"  href="{{ url_for('static', filename='styles/style.css') }}">
+    </head>
+    <body>
+        <h1 class="heading">Slideshow maker</h1>
+        <div class="imagebox">
+            <h2>Upload images here</h2>
+            
+            <div class="uploadimages">
+                <form action = "/upload" enctype = "multipart/form-data" method = "POST">
+                    <input class="file-upload-input" type="file" onchange="readURL(this)" accept="Image/*" multiple>
+                    <label for="file">Choose a file</label>
+                    <input type = "submit" value = "Upload" class="submit">
+                </form>
+            </div>
         </div>
-    </div>
+        
+        <h2>Create a Video</h2>
+        <!-- <button onclick="window.location.href = '{{ url_for('static', filename='video.html') }}'" class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">Watch Video</button> -->
+        <!-- <a href="video.html">
+            <button  class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">Create Video</button>
+        </a> -->
+        <button class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">
+            <a href="/video">Create Video</a>
+        </button>
+        <!-- <script>
+        function redirectToVideo() {
+        }
+        </script> -->
     
-    <h2>Create a Video</h2>
-    <!-- <button onclick="window.location.href = '{{ url_for('static', filename='video.html') }}'" class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">Watch Video</button> -->
-    <!-- <a href="video.html">
-        <button  class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">Create Video</button>
-    </a> -->
-    <button class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">
-        <a href="/video">Create Video</a>
-    </button>
-    <!-- <script>
-    function redirectToVideo() {
-    }
-    </script> -->
-  
-</body>
+    </body>
 </html>
