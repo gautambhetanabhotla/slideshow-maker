@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_session import Session
 import json
 import jwt
 import pymysql
@@ -12,6 +13,9 @@ app = Flask(__name__)
 users = json.load(open("data/users.json"))
 app.config['UPLOAD_FOLDER'] = "./uploads"
 app.secret_key = "SECRET_KEY_EXISTENTIA"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 @app.route("/")
 def rootpage():
@@ -27,7 +31,7 @@ def signup():
 
 @app.route("/home")
 def home():
-	return render_template("home.html")
+		return render_template("home.html")
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
@@ -68,7 +72,7 @@ def admin():
 
 @app.route("/video")
 def video():
-	return render_template("video.html")
+		return render_template("video.html")
 
 @app.route("/upload", methods = ["POST", "GET"])
 def upload():
