@@ -1,17 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang = "en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"  href="{{ url_for('static', filename='styles/style.css') }}">
+    <meta charset = "UTF-8">
+    <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
+    <link rel = "stylesheet" href = "{{ url_for('static', filename='styles/style.css') }}">
 
     <title>Video page</title>
 </head>
 <body>
-     <!-- <script>
-    function redirectToVideo() {
-    }
-    </script> -->
     <h1 style="text-align: center;padding:1%">Welcome to our video page</h1>
     <div class="image-selection">
         <div class="grid-container-preview">
@@ -61,7 +57,7 @@
         </div>
     </div>
     <div class="audio-selection">
-        <form action="/action_page.php">
+        <form action = "/upload" method = "POST">
             <label for="song">Choose an audio file:</label>
             <select id="song" name="song" style="padding: 1%;">
                 <option value="bgm1">Background music 1</option>
@@ -90,8 +86,8 @@
           </form>
     </div>
     <h2>Download Video</h2>
-    <div class="extract">
-        <button class="music_selection_button" >Download</button> 
+    <div class = "extract">
+        <button class = "music_selection_button">Download</button> 
     </div> 
 
     
