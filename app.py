@@ -10,6 +10,7 @@ import hashlib
 import base64
 import cv2
 
+
 def hashed(s):
 	pb = s.encode('utf-8')
 	hash_object = hashlib.sha256(pb)
