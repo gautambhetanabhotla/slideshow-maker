@@ -17,16 +17,20 @@ def hashed(s):
 
 connection = pymysql.connect(host='localhost', user='gautam', password='haha', autocommit=True)
 db = connection.cursor(pymysql.cursors.DictCursor)
-db.execute("CREATE DATABASE IF NOT EXISTS existentia")
-connection.commit()
-db.execute("USE existentia")
-connection.commit()
-db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255))")
-connection.commit()
-db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image LONGBLOB)")
-connection.commit()
-db.execute("CREATE TABLE IF NOT EXISTS audios(audio LONGBLOB, username VARCHAR(255))")
-connection.commit()
+
+def initialise_database():
+	db.execute("CREATE DATABASE IF NOT EXISTS existentia")
+	connection.commit()
+	db.execute("USE existentia")
+	connection.commit()
+	db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))")
+	connection.commit()
+	db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image LONGBLOB, FOREIGN KEY(username) REFERENCES users(username))")
+	connection.commit()
+	db.execute("CREATE TABLE IF NOT EXISTS audios(audio LONGBLOB, username VARCHAR(255), FOREIGN KEY(username) REFERENCES users(username)")
+	connection.commit()
+
+initialise_database()
 
 app = Flask(__name__)
 if os.path.exists("./uploads"):
@@ -39,15 +43,25 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-db.execute("SELECT * FROM users")
-users = db.fetchall()
-db.execute("SELECT * FROM images")
-images = db.fetchall()
-db.execute("SELECT * FROM audios")
-audios = db.fetchall()
+users = []
+images = []
+audios = []
+
+def getfromdatabase():
+	global users, images, audios
+	db.execute("SELECT * FROM users")
+	users = db.fetchall()
+	connection.commit()
+	db.execute("SELECT * FROM images")
+	images = db.fetchall()
+	connection.commit()
+	db.execute("SELECT * FROM audios")
+	audios = db.fetchall()
+	connection.commit()
+
+getfromdatabase()
 
 username = ""
-password = ""
 
 @app.route("/")
 def rootpage():
@@ -55,6 +69,29 @@ def rootpage():
 
 @app.route("/login")
 def login():
+	global username
+    # Check if JWT token is present in the request cookies
+	token = request.cookies.get('jwt_token')
+	if token:
+		try:
+            # Decode the JWT token
+			decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+			username = decoded_token['username']
+            # Verify the user's credentials
+			for user in users:
+				if user["username"] == username:
+					return redirect("/home")
+            # If user not found, redirect to login page
+			else:
+				username = ""
+				return redirect("/login", 301)
+		except jwt.ExpiredSignatureError:
+            # Token has expired
+			return redirect("/login", 301)
+		except jwt.InvalidTokenError:
+            # Invalid token
+			return redirect("/login", 301)
+    # Redirect to login page if no token is present
 	return render_template("login.html")
 
 @app.route("/signup")
@@ -69,7 +106,6 @@ def home():
 def processloginrequest():
 	if request.method == 'POST':
 		global username
-		global password
 		username = request.form["username"]
 		password = request.form["password"]
 		for user in users:
@@ -93,7 +129,7 @@ def processsignuprequest():
 				return redirect("/signup", 301)
 		else:
 			db.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
-			# connection.commit()
+			connection.commit()
 			return redirect("/login", 301)
 
 @app.route("/admin")
@@ -119,7 +155,7 @@ def upload():
 				return redirect("/home", 301)
 			blob = file.read()
 			db.execute("INSERT INTO images VALUES(%s, %s, %s)", (username, len(images) + 1, blob))
-			# connection.commit()
+			connection.commit()
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
 		return redirect("/home", 301)
 	if request.method == "GET":
