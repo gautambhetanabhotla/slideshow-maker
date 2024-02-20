@@ -6,7 +6,7 @@ import pymysql
 import pymysql.cursors
 import os
 
-connection = pymysql.connect(host='localhost', user='gautam', password='haha')
+connection = pymysql.connect(host='localhost', user='ravi', password='password')
 db = connection.cursor()
 
 app = Flask(__name__)
