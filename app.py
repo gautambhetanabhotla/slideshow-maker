@@ -1,5 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash,make_response,jsonify
-from flask_session import Session
+from flask import Flask, render_template, request, redirect, flash, make_response
 import json
 import jwt
 import pymysql
@@ -16,7 +15,7 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='gautam', password='haha', autocommit=True)
+connection = pymysql.connect(host='localhost', user='gautam', password='haha')
 db = connection.cursor(pymysql.cursors.DictCursor)
 
 def initialise_database():
@@ -42,9 +41,6 @@ else:
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 
 app.secret_key = "SECRET_KEY_EXISTENTIA"
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
 
 users = []
 images = []
@@ -131,7 +127,7 @@ def processsignuprequest():
 		for user in users:
 			if user["username"] == username:
 				flash("An account with this username already exists. Please choose a different username.")
-				return render_template("/signup", 301)
+				return render_template("signup.html")
 		else:
 			db.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
 			connection.commit()
