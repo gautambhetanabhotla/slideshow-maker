@@ -6,20 +6,36 @@ import pymysql
 import pymysql.cursors
 import os
 import datetime
+import hashlib
 
-connection = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
-db = connection.cursor()
+def hashed(s):
+	pb = s.encode('utf-8')
+	hash_object = hashlib.sha256(pb)
+	hex_dig = hash_object.hexdigest()
+	return hex_dig
+
+connection = pymysql.connect(host='localhost', user='ravi', password='password')
+db = connection.cursor(pymysql.cursors.DictCursor)
+db.execute("CREATE DATABASE IF NOT EXISTS existentia")
+db.execute("USE existentia")
+db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))")
+db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image BLOB, FOREIGN KEY(username) REFERENCES users(username))")
+db.execute("CREATE TABLE IF NOT EXISTS audios(audio BLOB, username VARCHAR(255), FOREIGN KEY(username) REFERENCES users(username))")
+connection.commit()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
-
-users = json.load(open("data/users.json"))
+db.execute("SELECT * FROM users")
+users = db.fetchall()
 if os.path.exists("./uploads"):
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 else:
 	os.mkdir("./uploads")
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 
+app.secret_key = "SECRET_KEY_EXISTENTIA"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 @app.route("/")
 def rootpage():
@@ -85,19 +101,18 @@ def processloginrequest():
 @app.route("/requestsignup", methods = ['POST'])
 def processsignuprequest():
 	if request.method == 'POST':
-		
 		username = request.form["username"]
 		password = request.form["password"]
+		email = request.form["email"]
+		name = request.form["name"]
 		for user in users:
 			if user["username"] == username:
 				flash("An account with this username already exists. Please choose a different username.")
 				return render_template("/signup", 301)
 		else:
-			users.append({"username": username, "password": password})
-			json.dump(users, open("data/users.json", "w"))
-			return render_template("/login", 301)
-	
-		
+			db.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
+			connection.commit()
+			return redirect("/login", 301)
 
 @app.route("/admin")
 def admin():
@@ -112,9 +127,12 @@ def upload():
 	if request.method == 'POST':
 		if 'file' not in request.files:
 			flash('No file part')
-			return render_template("/home", 301)
-		file = request.files['file']
-
+			return redirect("/home", 301)
+		files = request.files.getlist("file")
+		for file in files:
+			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename
 		if file.filename == '':
 			flash('No selected file')
 			return render_template("/home", 301)
