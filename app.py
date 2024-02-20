@@ -7,6 +7,7 @@ import pymysql.cursors
 import os
 import hashlib
 
+
 def hashed(s):
 	pb = s.encode('utf-8')
 	hash_object = hashlib.sha256(pb)
