@@ -142,7 +142,7 @@ def processsignuprequest():
 			return redirect("/login", 301)
 
 @app.route("/admin")
-def admin():
+def admin():	
 	return [users, images, audios]
 
 @app.route("/video")
