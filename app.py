@@ -20,6 +20,7 @@ connection = pymysql.connect(host='localhost', user='gautam', password='haha', a
 db = connection.cursor(pymysql.cursors.DictCursor)
 
 def initialise_database():
+	global db, connection
 	db.execute("CREATE DATABASE IF NOT EXISTS existentia")
 	connection.commit()
 	db.execute("USE existentia")
@@ -28,7 +29,7 @@ def initialise_database():
 	connection.commit()
 	db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image LONGBLOB, FOREIGN KEY(username) REFERENCES users(username))")
 	connection.commit()
-	db.execute("CREATE TABLE IF NOT EXISTS audios(audio LONGBLOB, username VARCHAR(255), FOREIGN KEY(username) REFERENCES users(username)")
+	db.execute("CREATE TABLE IF NOT EXISTS audios(username VARCHAR(255), audio_id INT, audio LONGBLOB, FOREIGN KEY(username) REFERENCES users(username))")
 	connection.commit()
 
 initialise_database()
@@ -54,10 +55,10 @@ def getfromdatabase():
 	db.execute("SELECT * FROM users")
 	users = db.fetchall()
 	connection.commit()
-	db.execute("SELECT * FROM images")
+	db.execute("SELECT username, image_id FROM images")
 	images = db.fetchall()
 	connection.commit()
-	db.execute("SELECT * FROM audios")
+	db.execute("SELECT username, audio_id FROM audios")
 	audios = db.fetchall()
 	connection.commit()
 
@@ -67,8 +68,6 @@ username = ""
 
 @app.route("/")
 def rootpage():
-    
-    
 	return render_template("root.html")
 
 @app.route("/login")
@@ -88,13 +87,13 @@ def login():
             # If user not found, redirect to login page
 			else:
 				username = ""
-				return redirect("/login", 301)
+				return render_template("login.html")
 		except jwt.ExpiredSignatureError:
             # Token has expired
-			return redirect("/login", 301)
+			return render_template("login.html")
 		except jwt.InvalidTokenError:
             # Invalid token
-			return redirect("/login", 301)
+			return "invalid token"
     # Redirect to login page if no token is present
 	return render_template("login.html")
 
@@ -114,26 +113,16 @@ def processloginrequest():
 		password = request.form["password"]
 		for user in users:
 			if user["username"] == username and user["password"] == hashed(password):
-				if username != "admin":
-					return redirect("/home", 301)
-				else:
-					return redirect("/admin", 301)
-		else:
-			return redirect("/login", 301)
-		
-	
-
-		for user in users:
-			if user["username"] == username and user["password"] == password:
 				token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
 				resp = make_response(redirect("/home" if username != "admin" else "/admin", 301))
 				resp.set_cookie('jwt_token', token)
 				return resp
-
-
+		else:
+			return redirect("/login", 301)
 	
 @app.route("/requestsignup", methods = ['POST'])
 def processsignuprequest():
+	global users
 	if request.method == 'POST':
 		username = request.form["username"]
 		password = request.form["password"]
@@ -145,6 +134,9 @@ def processsignuprequest():
 				return render_template("/signup", 301)
 		else:
 			db.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
+			connection.commit()
+			db.execute("SELECT * FROM users")
+			users = db.fetchall()
 			connection.commit()
 			return redirect("/login", 301)
 
@@ -158,6 +150,7 @@ def video():
 
 @app.route("/upload", methods = ["POST", "GET"])
 def upload():
+	global images, audios
 	if request.method == 'POST':
 		if 'file' not in request.files:
 			flash('No file part')
@@ -170,7 +163,10 @@ def upload():
 				flash('No selected file')
 				return redirect("/home", 301)
 			blob = file.read()
-			db.execute("INSERT INTO images VALUES(%s, %s, %s)", (username, len(images) + 1, blob))
+			db.execute("INSERT INTO images VALUES(%s, %s, %s)", (username, int(len(images)) + 1, blob))
+			connection.commit()
+			db.execute("SELECT username, image_id FROM images")
+			images = db.fetchall()
 			connection.commit()
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
 		return redirect("/home", 301)
