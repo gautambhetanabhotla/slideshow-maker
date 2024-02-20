@@ -2,3 +2,6 @@ __pycache__
 .vscode
 uploads
 flask_session
+node_modules
+package-lock.json
+package.json

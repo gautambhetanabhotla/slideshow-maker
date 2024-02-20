@@ -7,6 +7,8 @@ import pymysql.cursors
 import os
 import datetime
 import hashlib
+import base64
+import cv2
 
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -14,18 +16,24 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='ravi', password='password')
+connection = pymysql.connect(host='localhost', user='gautam', password='haha', autocommit=True)
 db = connection.cursor(pymysql.cursors.DictCursor)
-db.execute("CREATE DATABASE IF NOT EXISTS existentia")
-db.execute("USE existentia")
-db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))")
-db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image BLOB, FOREIGN KEY(username) REFERENCES users(username))")
-db.execute("CREATE TABLE IF NOT EXISTS audios(audio BLOB, username VARCHAR(255), FOREIGN KEY(username) REFERENCES users(username))")
-connection.commit()
+
+def initialise_database():
+	db.execute("CREATE DATABASE IF NOT EXISTS existentia")
+	connection.commit()
+	db.execute("USE existentia")
+	connection.commit()
+	db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))")
+	connection.commit()
+	db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image LONGBLOB, FOREIGN KEY(username) REFERENCES users(username))")
+	connection.commit()
+	db.execute("CREATE TABLE IF NOT EXISTS audios(audio LONGBLOB, username VARCHAR(255), FOREIGN KEY(username) REFERENCES users(username)")
+	connection.commit()
+
+initialise_database()
 
 app = Flask(__name__)
-db.execute("SELECT * FROM users")
-users = db.fetchall()
 if os.path.exists("./uploads"):
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 else:
@@ -37,6 +45,26 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+users = []
+images = []
+audios = []
+
+def getfromdatabase():
+	global users, images, audios
+	db.execute("SELECT * FROM users")
+	users = db.fetchall()
+	connection.commit()
+	db.execute("SELECT * FROM images")
+	images = db.fetchall()
+	connection.commit()
+	db.execute("SELECT * FROM audios")
+	audios = db.fetchall()
+	connection.commit()
+
+getfromdatabase()
+
+username = ""
+
 @app.route("/")
 def rootpage():
     
@@ -45,33 +73,30 @@ def rootpage():
 
 @app.route("/login")
 def login():
-        # Check if JWT token is present in the request cookies
-    token = request.cookies.get('jwt_token')
-
-    if token:
-        try:
+	global username
+    # Check if JWT token is present in the request cookies
+	token = request.cookies.get('jwt_token')
+	if token:
+		try:
             # Decode the JWT token
-            decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            username = decoded_token['username']
-
+			decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+			username = decoded_token['username']
             # Verify the user's credentials
-            for user in users:
-                if user["username"] == username:
-                    return redirect("/home")
-
+			for user in users:
+				if user["username"] == username:
+					return redirect("/home")
             # If user not found, redirect to login page
-            return render_template("login.html")
-
-        except jwt.ExpiredSignatureError:
+			else:
+				username = ""
+				return redirect("/login", 301)
+		except jwt.ExpiredSignatureError:
             # Token has expired
-            return render_template("login.html")
-        except jwt.InvalidTokenError:
+			return redirect("/login", 301)
+		except jwt.InvalidTokenError:
             # Invalid token
-            return render_template("login.html")
-
+			return redirect("/login", 301)
     # Redirect to login page if no token is present
-    return render_template("/login", 301)
-	
+	return render_template("login.html")
 
 @app.route("/signup")
 def signup():
@@ -84,8 +109,17 @@ def home():
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
 	if request.method == 'POST':
+		global username
 		username = request.form["username"]
 		password = request.form["password"]
+		for user in users:
+			if user["username"] == username and user["password"] == hashed(password):
+				if username != "admin":
+					return redirect("/home", 301)
+				else:
+					return redirect("/admin", 301)
+		else:
+			return redirect("/login", 301)
 		
 	
 
@@ -116,7 +150,7 @@ def processsignuprequest():
 
 @app.route("/admin")
 def admin():
-	return users
+	return [users, images, audios]
 
 @app.route("/video")
 def video():
@@ -130,16 +164,16 @@ def upload():
 			return redirect("/home", 301)
 		files = request.files.getlist("file")
 		for file in files:
+			# If the user does not select a file, the browser submits an
+        	# empty file without a filename
+			if file.filename == '':
+				flash('No selected file')
+				return redirect("/home", 301)
+			blob = file.read()
+			db.execute("INSERT INTO images VALUES(%s, %s, %s)", (username, len(images) + 1, blob))
+			connection.commit()
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename
-		if file.filename == '':
-			flash('No selected file')
-			return render_template("/home", 301)
-		if file:
-			filename = file.filename
-			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-			return os.path.join(app.config['UPLOAD_FOLDER'], filename)
+		return redirect("/home", 301)
 	if request.method == "GET":
 		return render_template("/home", 301)
 
