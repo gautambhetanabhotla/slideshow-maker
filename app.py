@@ -8,7 +8,8 @@ import datetime
 import hashlib
 import base64
 import cv2
-
+from PIL import Image
+import io
 
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -83,8 +84,7 @@ def login():
             else:
                 for user in users:
                     if user["username"] == username:
-                        return redirect("/home")
-					
+                        return redirect("/home")	
                 else:
                     username = ""
                     return render_template("login.html")
@@ -97,14 +97,24 @@ def login():
     # Redirect to login page if no token is present
     return render_template("login.html")
 
-
 @app.route("/signup")
 def signup():
 	return render_template("signup.html")
 
 @app.route("/home")
 def home():
-		return render_template("home.html")
+	global db, username
+	if os.path.exists("./renders"):
+		for file in os.listdir("./renders"):
+			os.remove(f"./renders/{file}")
+	else:
+		os.mkdir("./renders")
+	db.execute("SELECT image from images WHERE username = %s", (username))
+	pictures = db.fetchall()
+	for index, picture in enumerate(pictures):
+		image = Image.open(io.BytesIO(picture["image"]))
+		image.save(f"./renders/{username}_{index}.png")
+	return render_template("home.html")
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
@@ -147,7 +157,7 @@ def admin():
 
 @app.route("/video")
 def video():
-		return render_template("video.html")
+	return render_template("video.html")
 
 @app.route("/upload", methods = ["POST", "GET"])
 def upload():
@@ -169,13 +179,13 @@ def upload():
 			db.execute("SELECT username, image_id FROM images")
 			images = db.fetchall()
 			connection.commit()
-			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
 		return redirect("/home", 301)
 	if request.method == "GET":
 		return render_template("/home", 301)
+	
 @app.route("/logout")
 def delete_cookie():
-	response= redirect("/")
+	response = redirect("/")
 	response.delete_cookie('jwt_token')
 	return response
 
