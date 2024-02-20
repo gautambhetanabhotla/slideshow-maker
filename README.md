@@ -9,3 +9,11 @@
 - The web application is currently running on flask.
 - User data is stored in `users.json`.
 - The admin page is not a separate html file, but on logging in as admin, you will be able to see all user details.
+
+<br>
+
+# Milestone 2
+- Passwords are stored in the database in SHSA256 hashed format.
+- User authentication is now token-based (more specifically, JSON Web tokens).
+- User, image and audio data is stored in a local MySQL database, on the hosting server.
+- The hosting which was supposed to be done on flask was implemented during milestone 1 itself.

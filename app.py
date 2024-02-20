@@ -6,6 +6,8 @@ import pymysql
 import pymysql.cursors
 import os
 import hashlib
+import base64
+import cv2
 
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -13,18 +15,20 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='gautam', password='haha')
+connection = pymysql.connect(host='localhost', user='gautam', password='haha', autocommit=True)
 db = connection.cursor(pymysql.cursors.DictCursor)
 db.execute("CREATE DATABASE IF NOT EXISTS existentia")
+connection.commit()
 db.execute("USE existentia")
-db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))")
-db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image BLOB, FOREIGN KEY(username) REFERENCES users(username))")
-db.execute("CREATE TABLE IF NOT EXISTS audios(audio BLOB, username VARCHAR(255), FOREIGN KEY(username) REFERENCES users(username))")
+connection.commit()
+db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255))")
+connection.commit()
+db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image LONGBLOB)")
+connection.commit()
+db.execute("CREATE TABLE IF NOT EXISTS audios(audio LONGBLOB, username VARCHAR(255))")
 connection.commit()
 
 app = Flask(__name__)
-db.execute("SELECT * FROM users")
-users = db.fetchall()
 if os.path.exists("./uploads"):
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 else:
@@ -34,6 +38,16 @@ app.secret_key = "SECRET_KEY_EXISTENTIA"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+db.execute("SELECT * FROM users")
+users = db.fetchall()
+db.execute("SELECT * FROM images")
+images = db.fetchall()
+db.execute("SELECT * FROM audios")
+audios = db.fetchall()
+
+username = ""
+password = ""
 
 @app.route("/")
 def rootpage():
@@ -54,6 +68,8 @@ def home():
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
 	if request.method == 'POST':
+		global username
+		global password
 		username = request.form["username"]
 		password = request.form["password"]
 		for user in users:
@@ -61,7 +77,7 @@ def processloginrequest():
 				if username != "admin":
 					return redirect("/home", 301)
 				else:
-					return user["password"] + hashed(password)
+					return redirect("/admin", 301)
 		else:
 			return redirect("/login", 301)
 		
@@ -77,12 +93,12 @@ def processsignuprequest():
 				return redirect("/signup", 301)
 		else:
 			db.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
-			connection.commit()
+			# connection.commit()
 			return redirect("/login", 301)
 
 @app.route("/admin")
 def admin():
-	return users
+	return [users, images, audios]
 
 @app.route("/video")
 def video():
@@ -96,16 +112,16 @@ def upload():
 			return redirect("/home", 301)
 		files = request.files.getlist("file")
 		for file in files:
+			# If the user does not select a file, the browser submits an
+        	# empty file without a filename
+			if file.filename == '':
+				flash('No selected file')
+				return redirect("/home", 301)
+			blob = file.read()
+			db.execute("INSERT INTO images VALUES(%s, %s, %s)", (username, len(images) + 1, blob))
+			# connection.commit()
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename
-		if file.filename == '':
-			flash('No selected file')
-			return redirect("/home", 301)
-		if file:
-			filename = file.filename
-			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-			return os.path.join(app.config['UPLOAD_FOLDER'], filename)
+		return redirect("/home", 301)
 	if request.method == "GET":
 		return redirect("/home", 301)
 
