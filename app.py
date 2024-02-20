@@ -54,7 +54,7 @@ def login():
             return render_template("login.html")
 
     # Redirect to login page if no token is present
-    return redirect("/login", 301)
+    return render_template("/login", 301)
 	
 
 @app.route("/signup")
@@ -91,11 +91,11 @@ def processsignuprequest():
 		for user in users:
 			if user["username"] == username:
 				flash("An account with this username already exists. Please choose a different username.")
-				return redirect("/signup", 301)
+				return render_template("/signup", 301)
 		else:
 			users.append({"username": username, "password": password})
 			json.dump(users, open("data/users.json", "w"))
-			return redirect("/login", 301)
+			return render_template("/login", 301)
 	
 		
 
@@ -112,18 +112,18 @@ def upload():
 	if request.method == 'POST':
 		if 'file' not in request.files:
 			flash('No file part')
-			return redirect("/home", 301)
+			return render_template("/home", 301)
 		file = request.files['file']
 
 		if file.filename == '':
 			flash('No selected file')
-			return redirect("/home", 301)
+			return render_template("/home", 301)
 		if file:
 			filename = file.filename
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 			return os.path.join(app.config['UPLOAD_FOLDER'], filename)
 	if request.method == "GET":
-		return redirect("/home", 301)
+		return render_template("/home", 301)
 
 if __name__ == "__main__":
 	app.run(debug = True)
