@@ -17,7 +17,7 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='gautam', password='haha', autocommit=True)
+connection = pymysql.connect(host='localhost', user='ravi', password='password', autocommit=True)
 db = connection.cursor(pymysql.cursors.DictCursor)
 
 def initialise_database():
@@ -142,7 +142,7 @@ def processsignuprequest():
 			return redirect("/login", 301)
 
 @app.route("/admin")
-def admin():
+def admin():	
 	return [users, images, audios]
 
 @app.route("/video")
