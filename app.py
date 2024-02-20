@@ -13,7 +13,7 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='gautam', password='haha')
+connection = pymysql.connect(host='localhost', user='ravi', password='password')
 db = connection.cursor(pymysql.cursors.DictCursor)
 db.execute("CREATE DATABASE IF NOT EXISTS existentia")
 db.execute("USE existentia")
