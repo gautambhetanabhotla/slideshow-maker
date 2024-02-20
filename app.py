@@ -1,5 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash,make_response,jsonify
-from flask_session import Session
+from flask import Flask, render_template, request, redirect, flash, make_response
 import json
 import jwt
 import pymysql
@@ -10,13 +9,14 @@ import hashlib
 import base64
 import cv2
 
+
 def hashed(s):
 	pb = s.encode('utf-8')
 	hash_object = hashlib.sha256(pb)
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='root', password='Aryamah@12', autocommit=True)
+connection = pymysql.connect(host='localhost', user='gautam', password='haha')
 db = connection.cursor(pymysql.cursors.DictCursor)
 
 def initialise_database():
@@ -42,9 +42,6 @@ else:
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 
 app.secret_key = "SECRET_KEY_EXISTENTIA"
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
 
 users = []
 images = []
