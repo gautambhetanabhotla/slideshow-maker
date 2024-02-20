@@ -1,5 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash,make_response,jsonify
-from flask_session import Session
+from flask import Flask, render_template, request, redirect, flash, make_response
 import json
 import jwt
 import pymysql
@@ -17,7 +16,7 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='ravi', password='password', autocommit=True)
+connection = pymysql.connect(host='localhost', user='gautam', password='haha')
 db = connection.cursor(pymysql.cursors.DictCursor)
 
 def initialise_database():
@@ -43,9 +42,6 @@ else:
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 
 app.secret_key = "SECRET_KEY_EXISTENTIA"
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
 
 users = []
 images = []
@@ -73,30 +69,34 @@ def rootpage():
 
 @app.route("/login")
 def login():
-	global username
+    global username
     # Check if JWT token is present in the request cookies
-	token = request.cookies.get('jwt_token')
-	if token:
-		try:
+    token = request.cookies.get('jwt_token')
+    if token:
+        try:
             # Decode the JWT token
-			decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-			username = decoded_token['username']
+            decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            username = decoded_token['username']
             # Verify the user's credentials
-			for user in users:
-				if user["username"] == username:
-					return redirect("/home")
-            # If user not found, redirect to login page
-			else:
-				username = ""
-				return render_template("login.html")
-		except jwt.ExpiredSignatureError:
+            if username == 'admin':
+                return redirect("/admin")
+            else:
+                for user in users:
+                    if user["username"] == username:
+                        return redirect("/home")
+					
+                else:
+                    username = ""
+                    return render_template("login.html")
+        except jwt.ExpiredSignatureError:
             # Token has expired
-			return render_template("login.html")
-		except jwt.InvalidTokenError:
+            return render_template("login.html")
+        except jwt.InvalidTokenError:
             # Invalid token
-			return "invalid token"
+            return "invalid token"
     # Redirect to login page if no token is present
-	return render_template("login.html")
+    return render_template("login.html")
+
 
 @app.route("/signup")
 def signup():
@@ -132,7 +132,7 @@ def processsignuprequest():
 		for user in users:
 			if user["username"] == username:
 				flash("An account with this username already exists. Please choose a different username.")
-				return render_template("/signup", 301)
+				return render_template("signup.html")
 		else:
 			db.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
 			connection.commit()
@@ -173,6 +173,11 @@ def upload():
 		return redirect("/home", 301)
 	if request.method == "GET":
 		return render_template("/home", 301)
+@app.route("/logout")
+def delete_cookie():
+	response= make_response("Cookie_deleted")
+	response.delete_cookie('jwt_token')
+	return redirect("/")
 
 if __name__ == "__main__":
 	app.run(debug = True)
