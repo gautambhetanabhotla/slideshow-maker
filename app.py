@@ -175,9 +175,9 @@ def upload():
 		return render_template("/home", 301)
 @app.route("/logout")
 def delete_cookie():
-	response= make_response("Cookie_deleted")
+	response= redirect("/")
 	response.delete_cookie('jwt_token')
-	return redirect("/")
+	return response
 
 if __name__ == "__main__":
 	app.run(debug = True)
