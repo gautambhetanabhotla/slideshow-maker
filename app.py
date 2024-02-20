@@ -5,13 +5,30 @@ import jwt
 import pymysql
 import pymysql.cursors
 import os
+import hashlib
+
+def hashed(s):
+	pb = s.encode('utf-8')
+	hash_object = hashlib.sha256(pb)
+	hex_dig = hash_object.hexdigest()
+	return hex_dig
 
 connection = pymysql.connect(host='localhost', user='gautam', password='haha')
-db = connection.cursor()
+db = connection.cursor(pymysql.cursors.DictCursor)
+db.execute("CREATE DATABASE IF NOT EXISTS existentia")
+db.execute("USE existentia")
+db.execute("CREATE TABLE IF NOT EXISTS users(username VARCHAR(255), password VARCHAR(64), email VARCHAR(255), PRIMARY KEY(username))")
+db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image BLOB, FOREIGN KEY(username) REFERENCES users(username))")
+db.execute("CREATE TABLE IF NOT EXISTS audios(audio BLOB, username VARCHAR(255), FOREIGN KEY(username) REFERENCES users(username))")
+connection.commit()
 
 app = Flask(__name__)
 users = json.load(open("data/users.json"))
-app.config['UPLOAD_FOLDER'] = "./uploads"
+if os.path.exists("./uploads"):
+	app.config['UPLOAD_FOLDER'] = "./uploads"
+else:
+	os.mkdir("./uploads")
+	app.config['UPLOAD_FOLDER'] = "./uploads"
 app.secret_key = "SECRET_KEY_EXISTENTIA"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -80,7 +97,9 @@ def upload():
 		if 'file' not in request.files:
 			flash('No file part')
 			return redirect("/home", 301)
-		file = request.files['file']
+		files = request.files.getlist("file")
+		for file in files:
+			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         # If the user does not select a file, the browser submits an
         # empty file without a filename
 		if file.filename == '':
