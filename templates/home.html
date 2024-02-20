@@ -12,9 +12,13 @@
 </head>
 
 <body>
-    <h1 class="heading">Slideshow maker</h1>
-    <div class="imagebox">
-        <h2>Upload images here</h2>
+    <div class="container text-center p-3" style="color:darkorange;">
+        <h1>Slideshow maker</h1>
+    </div>
+    <div>
+        <div class="container text-center p-3">
+            <h2>Upload images here</h2>
+        </div>
         <div class="uploadimages">
             <form action="/upload" enctype="multipart/form-data" method="POST">
                 <input class="file-upload-input" type="file" name="file" onchange="readURL(this)" accept="Image/*"
@@ -24,10 +28,14 @@
             </form>
         </div>
     </div>
-    <h2>Create a Video</h2>
-    <button class="music_selection_button" style="text-align: center;margin-left: 45%;padding: 1%;">
-        <a href="/video">Create Video</a>
-    </button>
+    <div class="container text-center p-3">
+        <h2>Create a Video</h2>
+    </div>
+    <div class="container text-center">
+        <button class="btn btn-warning">
+            <a href="/video" style="color:red;">Create Video</a>
+        </button>
+    </div>
 </body>
 
 </html>

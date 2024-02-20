@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash,make_response,jsonify
 from flask_session import Session
 import json
 import jwt
 import pymysql
 import pymysql.cursors
 import os
+import datetime
 import hashlib
 import base64
 import cv2
@@ -38,6 +39,7 @@ if os.path.exists("./uploads"):
 else:
 	os.mkdir("./uploads")
 	app.config['UPLOAD_FOLDER'] = "./uploads"
+
 app.secret_key = "SECRET_KEY_EXISTENTIA"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -65,6 +67,8 @@ username = ""
 
 @app.route("/")
 def rootpage():
+    
+    
 	return render_template("root.html")
 
 @app.route("/login")
@@ -117,6 +121,17 @@ def processloginrequest():
 		else:
 			return redirect("/login", 301)
 		
+	
+
+		for user in users:
+			if user["username"] == username and user["password"] == password:
+				token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+				resp = make_response(redirect("/home" if username != "admin" else "/admin", 301))
+				resp.set_cookie('jwt_token', token)
+				return resp
+
+
+	
 @app.route("/requestsignup", methods = ['POST'])
 def processsignuprequest():
 	if request.method == 'POST':
@@ -126,7 +141,8 @@ def processsignuprequest():
 		name = request.form["name"]
 		for user in users:
 			if user["username"] == username:
-				return redirect("/signup", 301)
+				flash("An account with this username already exists. Please choose a different username.")
+				return render_template("/signup", 301)
 		else:
 			db.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
 			connection.commit()
@@ -159,7 +175,7 @@ def upload():
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
 		return redirect("/home", 301)
 	if request.method == "GET":
-		return redirect("/home", 301)
+		return render_template("/home", 301)
 
 if __name__ == "__main__":
 	app.run(debug = True)
