@@ -23,7 +23,7 @@
             <div class=" collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav ms-auto ">
                     <li class="nav-item">
-                        <a class="nav-link mx-2 active" aria-current="page" onclick="window.location.href='/logout'">Logout</a>
+                        <a class="nav-link mx-2 active" aria-current="page" onclick="window.location.href='/logout'" style="cursor: pointer;">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -53,6 +53,11 @@
             <a href="/video" style="color:red;">Create Video</a>
         </button>
     </div>
+    {% for file_name in source_file %}
+    <img src="{{ url_for('static', filename='renders/' + file_name) }}" alt="Image">
+{% endfor %}
+
+
 </body>
 
 </html>

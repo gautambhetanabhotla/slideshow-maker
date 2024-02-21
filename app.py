@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, make_response
+from flask import Flask, render_template, request, redirect, flash, make_response, url_for
 import json
 import jwt
 import pymysql
@@ -10,6 +10,7 @@ import base64
 import cv2
 from PIL import Image
 import io
+import sys
 
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -17,7 +18,7 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='gautam', password='haha')
+connection = pymysql.connect(host='localhost', user='ravi', password='password')
 db = connection.cursor(pymysql.cursors.DictCursor)
 
 def initialise_database():
@@ -103,18 +104,12 @@ def signup():
 
 @app.route("/home")
 def home():
-	global db, username
-	if os.path.exists("./renders"):
-		for file in os.listdir("./renders"):
-			os.remove(f"./renders/{file}")
-	else:
-		os.mkdir("./renders")
-	db.execute("SELECT image from images WHERE username = %s", (username))
-	pictures = db.fetchall()
-	for index, picture in enumerate(pictures):
-		image = Image.open(io.BytesIO(picture["image"]))
-		image.save(f"./renders/{username}_{index}.png")
-	return render_template("home.html")
+
+    path_pic = os.path.join('static', 'renders')  # Adjust the path based on your directory structure
+    send_pic = [file_name for file_name in os.listdir(path_pic)]
+    return render_template("home.html", source_file=send_pic)
+
+
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
