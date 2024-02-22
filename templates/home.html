@@ -19,11 +19,11 @@
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class=" collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav ms-auto ">
                     <li class="nav-item">
-                        <a class="nav-link mx-2 active" aria-current="page" onclick="window.location.href='/logout'">Logout</a>
+                        <a class="nav-link mx-2 active" aria-current="page" onclick="window.location.href='/logout'"
+                            style="cursor: pointer;">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -45,14 +45,54 @@
             </form>
         </div>
     </div>
-    <div class="container text-center p-3">
-        <h2>Create a Video</h2>
-    </div>
-    <div class="container text-center">
-        <button class="btn btn-warning">
-            <a href="/video" style="color:red;">Create Video</a>
-        </button>
-    </div>
+    <form action="/video" id="my-form">
+        <div class="container rounded mt-5 text-center">
+            <div class="row d-flex flex-row justify-content-between rounded p-3">
+                {% for file_name in source_file %}
+                <div class="col-4 p-3 rounded pics">
+                    <input type="checkbox" id="check{{ loop.index0 }}" name="chkbox{{ loop.index0 }}" />
+                    <label for="check{{ loop.index0 }}">
+                        <img src="{{ url_for('static', filename='renders/' + file_name) }}" alt="Image">
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="container text-center p-5">
+                <div class="row">
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-lg btn-danger" id="delete_button">Delete
+                            Image</button>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-lg btn-primary" id="create_video_button">Create
+                            Video</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+    <script>
+        document.getElementById("delete_button").addEventListener("click", function () {
+            if (document.querySelectorAll('input[name^="chkbox"]:checked').length === 0) {
+                alert("Please select at least one image to delete.");
+                return;
+            }
+            document.getElementById("my-form").action = "/delete";
+            document.getElementById("my-form").submit();
+            window.location.href = "/delete";
+        });
+        document.getElementById("create_video_button").addEventListener("click", function () {
+            if (document.querySelectorAll('input[name^="chkbox"]:checked').length === 0) {
+                alert("Please select at least one image to delete.");
+                return;
+            }
+            document.getElementById("my-form").submit();
+            window.location.href = "/video";
+        });
+    </script>
+
 </body>
 
 </html>

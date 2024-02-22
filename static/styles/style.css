@@ -4,88 +4,144 @@
     border: 0;
 
 }
-.heading
-{
+
+.heading {
     color: rgb(13, 13, 13);
     font-family: 'Times New Roman', Times, serif;
     text-align: center;
     font-size: 60px;
     color: rgb(222, 160, 26);
 }
+
 .uploadimages {
-    
+
     font-family: 'Times New Roman', Times, serif;
     background-color: beige;
     margin-left: 24%;
     padding: 4%;
-    border: 2px solid rgba(0, 0, 0,0.3);
-   
+    border: 2px solid rgba(0, 0, 0, 0.3);
+
     text-align: center;
     width: 50%;
 
 }
-h2 
-{
+
+h2 {
     padding: 1%;
     text-align: center;
 }
-.file-upload-input
-{
-    border: 2px solid rgba(0, 0, 0,0.3);
+
+.file-upload-input {
+    border: 2px solid rgba(0, 0, 0, 0.3);
     padding: 2%;
     background-color: white;
 }
-.image-selection
-{
+
+.image-selection {
     width: 58%;
     margin-left: 24%;
 
     background-color: beige;
     text-align: center;
 }
+
 .grid-container-preview {
     display: grid;
     grid-template-columns: 33% 33% 33%;
-    background-color:beige;
+    background-color: beige;
     padding: 10px;
-  }
-.audio
-{
+}
+
+.audio {
     padding: 2%;
     text-align: center;
 
 }
-.audio-selection
-{
+
+.audio-selection {
     padding: 2%;
     margin-left: 35%;
-    
-    
+
+
 }
-.music_selection_button
-{
+
+.music_selection_button {
     padding: 1%;
     background-color: red;
     font-weight: bolder;
 }
-.audio-file-selection
-{
+
+.audio-file-selection {
     background-color: beige;
     width: 50%;
     margin-left: 30%;
 }
-.finalvideo
-{
+
+.finalvideo {
     width: 600px;
     height: 400px;
     margin-left: 30%;
 }
-.output_settings
-{
+
+.output_settings {
     text-align: center;
 }
-.extract
-{
+
+.extract {
     text-align: center;
     padding: 2%;
+}
+
+input[type="checkbox"][id^="check"] {
+    display: none;
+}
+
+label {
+    border: 1px solid #fff;
+    padding: 10px;
+    display: block;
+    position: relative;
+    margin: 10px;
+    cursor: pointer;
+}
+
+label::before {
+    background-color: white;
+    color: white;
+    content: " ";
+    display: block;
+    border-radius: 50%;
+    border: 1px solid grey;
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    line-height: 28px;
+    transition-duration: 0.4s;
+    transform: scale(0);
+}
+
+label img {
+    height: 250px;
+    width: 250px;
+    transition-duration: 0.2s;
+    transform-origin: 50% 50%;
+}
+
+:checked+label {
+    border-color: #bc0c0c;
+}
+
+:checked+label::before {
+    content: "✓";
+    background-color: black;
+    transform: scale(1);
+}
+
+:checked+label img {
+    transform: scale(0.9);
+    box-shadow: 0 0 5px #333;
+    z-index: -1;
 }

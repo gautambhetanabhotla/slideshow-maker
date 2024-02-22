@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, make_response
+from flask import Flask, render_template, request, redirect, flash, make_response, url_for
 import json
 import jwt
 from matplotlib.pylab import f
@@ -10,6 +10,7 @@ import hashlib
 import cv2
 from PIL import Image, TiffImagePlugin
 import io
+import sys
 from PIL.ExifTags import TAGS
 import copy
 
@@ -19,7 +20,7 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='gautam', password='haha')
+connection = pymysql.connect(host='localhost', user='ravi', password='password')
 db = connection.cursor(pymysql.cursors.DictCursor)
 
 def initialise_database():
@@ -140,18 +141,19 @@ def home():
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
-	if request.method == 'POST':
-		global username
-		username = request.form["username"]
-		password = request.form["password"]
-		for user in users:
-			if user["username"] == username and user["password"] == hashed(password):
-				token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-				resp = make_response(redirect("/home" if username != "admin" else "/admin", 301))
-				resp.set_cookie('jwt_token', token)
-				return resp
-		else:
-			return redirect("/login", 301)
+    if request.method == 'POST':
+        global username
+        username = request.form["username"]
+        password = request.form["password"]
+        i = 0
+        for user in users:
+            if user["username"] == username and user["password"] == hashed(password):
+                token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+                resp = make_response(redirect("/home" if username != "admin" else "/admin", 301))
+                resp.set_cookie('jwt_token', token)
+                return resp
+        else:
+            return redirect("/login", 301)
 	
 @app.route("/requestsignup", methods = ['POST'])
 def processsignuprequest():

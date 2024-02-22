@@ -1,7 +1,9 @@
 body {
-    background-image: url(https://t4.ftcdn.net/jpg/03/70/74/93/360_F_370749364_edpaAE8lBB6obsshMbLsYtT0SM8PZmP3.jpg);
+    background-image: url(../images/login-signup.jpg);
     background-repeat: no-repeat;
-    background-size: 100%;
+    background-size: cover;
+    width: 100vw;
+    height: 100vh;
     margin: 0;
     padding: 0;
     font-family: 'Protest Riot', sans-serif;
