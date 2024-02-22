@@ -111,20 +111,21 @@ def home():
 
 
 
-@app.route("/requestlogin", methods = ['POST'])
+@app.route("/requestlogin", methods=['POST'])
 def processloginrequest():
-	if request.method == 'POST':
-		global username
-		username = request.form["username"]
-		password = request.form["password"]
-		for user in users:
-			if user["username"] == username and user["password"] == hashed(password):
-				token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-				resp = make_response(redirect("/home" if username != "admin" else "/admin", 301))
-				resp.set_cookie('jwt_token', token)
-				return resp
-		else:
-			return redirect("/login", 301)
+    if request.method == 'POST':
+        global username
+        username = request.form["username"]
+        password = request.form["password"]
+        i = 0
+        for user in users:
+            if user["username"] == username and user["password"] == hashed(password):
+                token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+                resp = make_response(redirect("/home" if username != "admin" else "/admin", 301))
+                resp.set_cookie('jwt_token', token)
+                return resp
+        else:
+            return redirect("/login", 301)
 	
 @app.route("/requestsignup", methods = ['POST'])
 def processsignuprequest():
