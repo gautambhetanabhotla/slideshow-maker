@@ -13,7 +13,6 @@ import io
 import sys
 from PIL.ExifTags import TAGS
 import copy
-
 def hashed(s):
 	pb = s.encode('utf-8')
 	hash_object = hashlib.sha256(pb)
@@ -21,7 +20,7 @@ def hashed(s):
 	return hex_dig
 
 def initialise_database():
-	connection = pymysql.connect(host='localhost', user='gautam', password='haha')
+	connection = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
 	db = connection.cursor(pymysql.cursors.DictCursor)
 	db.execute("CREATE DATABASE IF NOT EXISTS existentia")
 	connection.commit()
@@ -37,8 +36,8 @@ def initialise_database():
 	connection.close()
 
 initialise_database()
-
 app = Flask(__name__)
+
 if os.path.exists("./uploads"):
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 else:
@@ -53,7 +52,7 @@ audios = []
 
 def getfromdatabase():
 	global users, images, audios
-	connection2 = pymysql.connect(host='localhost', user='gautam', password='haha')
+	connection2 = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
 	db2 = connection2.cursor(pymysql.cursors.DictCursor)
 	db2.execute("USE existentia")
 	connection2.commit()
@@ -119,7 +118,7 @@ def home():
 	if not os.path.exists("./static/renders"):
 		os.mkdir("./static/renders")
 	global username
-	connection3 = pymysql.connect(host='localhost', user='gautam', password='haha')
+	connection3 = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
 	db3 = connection3.cursor(pymysql.cursors.DictCursor)
 	db3.execute("USE existentia")
 	connection3.commit()
@@ -129,13 +128,15 @@ def home():
 	db3.close()
 	connection3.close()
 	numfiles = len(os.listdir("./static/renders"))
-	if numfiles != 0:
+	
+		
+	if numfiles != 0 :
 		for file in os.listdir("./static/renders"):
 			if username == "":
 				return "null username"
 			if file.startswith(username):
 				if(len(userimages) == numfiles):
-					return render_template("home.html")
+					return render_template("home.html", source_file = os.listdir("./static/renders"))
 				else:
 					erasedirectory("./static/renders")
 					return redirect("/home", 301)				
@@ -143,7 +144,7 @@ def home():
 	else:
 		if username == "":
 			return "null username"
-		connection4 = pymysql.connect(host='localhost', user='gautam', password='haha')
+		connection4 = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
 		db4 = connection4.cursor(pymysql.cursors.DictCursor)
 		db4.execute("USE existentia")
 		connection4.commit()
@@ -185,7 +186,7 @@ def processsignuprequest():
 				flash("An account with this username already exists. Please choose a different username.")
 				return render_template("signup.html")
 		else:
-			connection5 = pymysql.connect(host='localhost', user='gautam', password='haha')
+			connection5 = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
 			db5 = connection5.cursor(pymysql.cursors.DictCursor)
 			db5.execute("USE existentia")
 			connection5.commit()
@@ -231,7 +232,7 @@ def uploadimages():
 			# 	value = exifdata.get(tagid)
 			# 	metadata[tagname] = value
 			blob = file.read()
-			connection6 = pymysql.connect(host='localhost', user='gautam', password='haha')
+			connection6 = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
 			if not connection6.open:
 				return "null connection"
 			db6 = connection6.cursor(pymysql.cursors.DictCursor)
