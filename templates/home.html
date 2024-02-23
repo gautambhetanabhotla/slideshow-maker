@@ -57,13 +57,9 @@
                 </div>
                 {% endfor %}
             </div>
-            <div class="container text-center p-5">
-                <div class="row">
-                    <div class="col-md-6">
-                        <button type="button" class="btn btn-lg btn-danger" id="delete_button">Delete
-                            Image</button>
-                    </div>
-                    <div class="col-md-6">
+            <div class="container  p-5">
+                <div class="row " >
+                    <div class="col text-center">
                         <button type="button" class="btn btn-lg btn-primary" id="create_video_button">Create
                             Video</button>
                     </div>
@@ -74,18 +70,10 @@
 
 
     <script>
-        document.getElementById("delete_button").addEventListener("click", function () {
-            if (document.querySelectorAll('input[name^="chkbox"]:checked').length === 0) {
-                alert("Please select at least one image to delete.");
-                return;
-            }
-            document.getElementById("my-form").action = "/deleteimages";
-            document.getElementById("my-form").submit();
-            window.location.href = "/deleteimages";
-        });
+      
         document.getElementById("create_video_button").addEventListener("click", function () {
             if (document.querySelectorAll('input[name^="chkbox"]:checked').length === 0) {
-                alert("Please select at least one image to delete.");
+                alert("Please select at least one image to create a video.");
                 return;
             }
             document.getElementById("my-form").submit();
