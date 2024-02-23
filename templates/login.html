@@ -21,9 +21,9 @@
     <div class = "bg">
         <image src = "{{ url_for('static', filename='images/space.png') }}"></image>
     </div>
-    <div>
+    <div class="full">
         <form action="/requestlogin", method="POST">
-            <div class = "foorm">
+            <div class = "container text-center foorm">
                 <input type="text" name="username" placeholder="Username" class = "poppins-regular">
                 <input type="password" name="password" placeholder="Password" class = "poppins-regular">
                 <button class="btn btn-outline-light btn-lg" type="submit" class = "poppins-regular">Submit</button>
