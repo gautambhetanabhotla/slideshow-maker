@@ -9,26 +9,40 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-wvoo7sBLx41+dmoJPcbz6/1x4LNPp7TIq9h2c+q6UqD6wTQ2mt8J/7TVus7T8UcclYef3rElXZ7eUJjRzS8bSg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark p-3">
+
+    <nav class="navbar navbar-expand-lg navbar p-1" style="background-color: black;">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">SlideShow Maker</a>
+            <a class="navbar-brand" href="#" style="color: white;">
+                <h2>SlideShow Maker</h2>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class=" collapse navbar-collapse" id="navbarNavDropdown">
-                <ul class="navbar-nav ms-auto ">
-                    <li class="nav-item">
-                        <a class="nav-link mx-2 active" aria-current="page" onclick="window.location.href='/logout'"
-                            style="cursor: pointer;" id="logout_button">Logout</a>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img src="../static/images/Screenshot from 2024-02-23 19-17-44.png" alt="pfp"
+                                style="width: 100px;height: auto;">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="/profile" style="font-size: 1.5rem;">My Profile</a>
+                            <a class="dropdown-item" href="/logout" style="font-size: 1.5rem;">Logout</a>
+                        </div>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
+
     <div class="container text-center p-3" style="color:darkorange;">
         <h1>Slideshow maker</h1>
     </div>
@@ -45,20 +59,21 @@
             </form>
         </div>
     </div>
-    <form action="/video" id="my-form" method = "GET">
+    <form action="/video" id="my-form" method="GET">
         <div class="container rounded mt-5 text-center">
             <div class="row d-flex flex-row justify-content-between align-items-center rounded ">
                 {% for file_name in source_file %}
                 <div class="col rounded">
                     <input type="checkbox" id="check{{ loop.index0 }}" name="chkbox{{ loop.index0 }}" />
                     <label for="check{{ loop.index0 }}">
-                        <img src="{{ url_for('static', filename='renders/' + file_name) }}" alt="Image" style="object-fit: cover;width: 350px;height:auto;" >
+                        <img src="{{ url_for('static', filename='renders/' + file_name) }}" alt="Image"
+                            style="object-fit: cover;width: 350px;height:auto;">
                     </label>
                 </div>
                 {% endfor %}
             </div>
             <div class="container  p-5">
-                <div class="row " >
+                <div class="row ">
                     <div class="col text-center">
                         <button type="button" class="btn btn-lg btn-primary" id="create_video_button">Create
                             Video</button>
@@ -69,8 +84,7 @@
     </form>
 
 
-    <script>
-      
+    <script>      
       document.getElementById("create_video_button").addEventListener("click", function () {
     var selectedFiles = document.querySelectorAll('input[name^="chkbox"]:checked');
     if (selectedFiles.length === 0) {
@@ -95,7 +109,6 @@
     })
     .then(response => {
         if (response.ok) {
-            
             window.location.href = "/video";
         } else {
             alert('Failed to move files.');
