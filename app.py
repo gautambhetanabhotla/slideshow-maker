@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, flash, make_response, url_for, jsonify
 import json
 import jwt
-from matplotlib.pylab import f
 import pymysql
 import pymysql.cursors
 import os
@@ -12,7 +11,9 @@ from PIL import Image, TiffImagePlugin
 import io
 import sys
 from PIL.ExifTags import TAGS
+import shutil
 import copy
+
 def hashed(s):
 	pb = s.encode('utf-8')
 	hash_object = hashlib.sha256(pb)
@@ -111,8 +112,13 @@ def login():
 
 @app.route("/signup")
 def signup():
-	return render_template("signup.html")
-
+    token = request.cookies.get('jwt_token')
+    if token:
+        response = make_response(render_template("signup.html"))
+        response.delete_cookie('jwt_token')
+        return response
+    
+    return render_template("signup.html")
 @app.route("/home")
 def home():
 	if not os.path.exists("./static/renders"):
@@ -204,6 +210,19 @@ def admin():
 	global users, images, audios
 	return [users, images, audios]
 
+@app.route('/move_files', methods=['POST'])
+def move_files():
+    data = request.get_json()
+    files = data.get('files', [])
+    destination_folder = './static/images'  # Specify the destination folder
+    
+    for file_name in files:
+        source_path = os.path.join('./static/renders', file_name)  # Specify the source folder
+        destination_path = os.path.join(destination_folder, file_name)
+        shutil.move(source_path, destination_path)
+    
+    return jsonify({'message': 'Files moved successfully'})
+
 @app.route("/video", methods = ['POST', 'GET'])
 def video():
 	return render_template("video.html")
@@ -223,54 +242,97 @@ def profile():
     db6.close()
     connection6.close()
     return render_template("profile.html",username=username,name=Name["name"],mail=Mail["email"])
-
 @app.route("/uploadimages", methods = ["POST"])
+
+
 def uploadimages():
-	global images, username
-	if request.method == 'POST':
-		if 'file' not in request.files:
-			flash('No file part')
-			return redirect("/home", 301)
-		files = request.files.getlist("file")
-		for file in files:
-			# If the user does not select a file, the browser submits an
-        	# empty file without a filename
-			if file.filename == '':
-				flash('No selected file')
-				return redirect("/home", 301)
-			# file2 = copy.deepcopy(file)
-			# i = Image.open(file2)
-			# exifdata = i._getexif()
-			# metadata = { TAGS[k]: v for k, v in exifdata.items() if k in TAGS and type(v) not in [bytes, TiffImagePlugin.IFDRational] }
-			metadata = {"null": "null"}
-			# for tagid in exifdata:
-			# 	tagname = TAGS.get(tagid, tagid)
-			# 	value = exifdata.get(tagid)
-			# 	metadata[tagname] = value
-			blob = file.read()
-			connection6 = pymysql.connect(host='localhost', user='ravi', password='password')
-			if not connection6.open:
-				return "null connection"
-			db6 = connection6.cursor(pymysql.cursors.DictCursor)
-			db6.execute("USE existentia")
-			connection6.commit()
-			db6.execute("INSERT INTO images VALUES(%s, %s, %s, %s)", (username, int(len(images)) + 1, blob, json.dumps(metadata)))
-			connection6.commit()
-			db6.execute("SELECT username, image_id, metadata FROM images")
-			images = db6.fetchall()
-			connection6.commit()
-			db6.close()
-			connection6.close()
-		return redirect("/home", 301)
-	
+    global images, username
+    
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect("/home", 301)
+        
+        files = request.files.getlist("file")
+        
+        if len(files) == 0:
+            flash('No selected file')
+            return redirect("/home", 301)
+        
+        for file in files:
+            if file.filename == '':
+                flash('No selected file')
+                return redirect("/home", 301)
+            
+            blob = file.read()
+            
+            
+            img = Image.open(io.BytesIO(blob))
+            metadata = {
+    "width": img.width,
+    "height": img.height,
+    "format": img.format,
+    "mode": img.mode,  
+    "dpi": img.info.get("dpi"), 
+    "compression": img.info.get("compression"), 
+    "exif": img.info.get("exif"),
+    "icc_profile": img.info.get("icc_profile"), 
+    "transparency": img.info.get("transparency"), 
+    "color_palette": img.palette, 
+    "layers": img.n_frames, 
+    "transparent_color": img.info.get("transparency"), 
+    
+}
+
+            metadata_json = json.dumps(metadata)
+            
+            
+            connection = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
+            if not connection.open:
+                return "null connection"
+            
+            db = connection.cursor(pymysql.cursors.DictCursor)
+            db.execute("USE existentia")
+            db.execute("INSERT INTO images VALUES(%s, %s, %s, %s)", (username, int(len(images)) + 1, blob, metadata_json))
+            connection.commit()
+            
+           
+            db.execute("SELECT username, image_id, metadata FROM images")
+            images = db.fetchall()
+            connection.commit()
+            
+            db.close()
+            connection.close()
+        
+        return redirect("/home", 301)
+
 @app.route("/logout")
-def delete_cookie():
-	global username
-	response = redirect("/")
-	response.delete_cookie('jwt_token')
-	erasedirectory("./static/renders")
-	username = ""
-	return response
+def logout_and_delete():
+    image_folder = 'static/images'
+    
+    # Delete all files in the images folder
+    for filename in os.listdir(image_folder):
+        file_path = os.path.join(image_folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
+    
+    # Delete the JWT token cookie
+    response = redirect("/")
+    response.delete_cookie('jwt_token')
+    
+    # Delete all files in the renders folder
+    erasedirectory("./static/renders")
+    
+    # Reset the global variable
+    global username
+    username = ""
+    
+    return response
 
 @app.route("/deleteimages", methods = ["POST", "GET"])
 def deleteimages():
