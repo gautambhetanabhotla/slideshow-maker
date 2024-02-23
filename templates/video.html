@@ -37,130 +37,109 @@
     </div>
     <div>
         <div class="container text-center">
-            <div class="row justify-content-space-around" style="padding: 1.4rem;">
-                <div class="col-4">
-                    <img src="{{ url_for('static', filename='images/hardcodep1.jpeg') }}" alt="Description of the image"
-                        width="110" height="110" class="rounded-4">
-                </div>
-                <div class="col-4">
-                    <img src="{{ url_for('static', filename='images/hardcodep2.jpeg') }}" alt="Description of the image"
-                        width="110" height="110" class="rounded-4">
-                </div>
-                <div class="col-4">
-                    <img src="{{ url_for('static', filename='images/hardcodep3.jpeg') }}" alt="Description of the image"
-                        width="110" height="110" class="rounded-4">
-                </div>
-            </div>
-            <div class="row justify-content-space-around" style="margin-bottom:1vw;padding: 1rem;">
-                <div class="col-4">
-                    <img src="{{ url_for('static', filename='images/hardcodep4.jpeg') }}" alt="Description of the image"
-                        width="110" height="110" class="rounded-4">
-                </div>
-                <div class="col-4">
-                    <img src="{{ url_for('static', filename='images/hardcodep5.jpg') }}" alt="Description of the image"
-                        width="110" height="110" class="rounded-4">
-                </div>
-                <div class="col-4">
-                    <img src="{{ url_for('static', filename='images/hardcodep6.jpg') }}" alt="Description of the image"
-                        width="110" height="110" class="rounded-4">
-                </div>
+            <div class="row d-flex">
+                {% for file_name in image_files %}
+                    <div class="col-4">
+                        <img src="{{ url_for('static', filename='images/' + file_name) }}"
+                            alt="Description of the image" width="110" height="110" class="rounded-4">
+                    </div>
+                {% endfor %}
             </div>
         </div>
-    </div>
-    <div class="container text-center text-dark" style="padding: 2vw;">
-        <h2>Select an audio file</h2>
-    </div>
-    <div>
+        <div class="container text-center text-dark" style="padding: 2vw;">
+            <h2>Select an audio file</h2>
+        </div>
+        <div>
+            <div class="container text-center">
+                <h3>Background music 1</h3>
+                <audio controls loop>
+                    <source src="{{ url_for('static', filename='music/Happy_birthday_to_you_MIDI(chosic.com).mp3') }}">
+                </audio>
+                <br>
+                <h3>Background music 2</h3>
+                <audio controls loop>
+                    <source src="{{ url_for('static', filename='/music/Heat-Waves(PagalWorld).mp3') }}">
+                </audio>
+                <br>
+                <h3>Background music 3</h3>
+                <audio controls loop>
+                    <source
+                        src="{{ url_for('static', filename='music/Zara-Zara-Behekta-Hai-(Female-Version)(PagalWorldl).mp3') }}">
+                </audio>
+                <br>
+                <h3>Background music 4</h3>
+                <audio controls loop>
+                    <source
+                        src="{{ url_for('static', filename='music/OneRepublic---I-Aint-Worried-(From-Top-Gun_-Maverick)(pagalworld.co.uk).mp3') }}">
+                </audio>
+                <br>
+            </div>
+        </div>
+        <div>
+            <form action="/upload" method="POST">
+                <div class="container text-center">
+                    <div class="d-flex flex-row justify-content-center p-4">
+                        <div>
+                            <label for="song" class="mt-3">
+                                <h4>Choose an audio file :</h4>
+                            </label>
+                        </div>
+                        <div>
+                            <select name="song" class="form-select p-3 wid">
+                                <option value="1" selected>Select Song</option>
+                                <option value="2">Background music 1</option>
+                                <option value="3">Background music 2</option>
+                                <option value="4">Background music 3</option>
+                                <option value="5">Background music 4</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="container text-center">
+                    <input type="submit" class="music_selection_button">
+                </div>
+            </form>
+        </div>
+        <h2 class="mt-5">Video preview</h2>
         <div class="container text-center">
-            <h3>Background music 1</h3>
-            <audio controls loop>
-                <source src="{{ url_for('static', filename='music/Happy_birthday_to_you_MIDI(chosic.com).mp3') }}">
-            </audio>
-            <br>
-            <h3>Background music 2</h3>
-            <audio controls loop>
-                <source src="{{ url_for('static', filename='/music/Heat-Waves(PagalWorld).mp3') }}">
-            </audio>
-            <br>
-            <h3>Background music 3</h3>
-            <audio controls loop>
-                <source
-                    src="{{ url_for('static', filename='music/Zara-Zara-Behekta-Hai-(Female-Version)(PagalWorldl).mp3') }}">
-            </audio>
-            <br>
-            <h3>Background music 4</h3>
-            <audio controls loop>
-                <source
-                    src="{{ url_for('static', filename='music/OneRepublic---I-Aint-Worried-(From-Top-Gun_-Maverick)(pagalworld.co.uk).mp3') }}">
-            </audio>
-            <br>
-        </div>
-    </div>
-    <div>
-        <form action="/upload" method="POST">
-            <div class="container text-center">
-                <div class="d-flex flex-row justify-content-center p-4">
-                    <div>
-                        <label for="song" class="mt-3">
-                            <h4>Choose an audio file :</h4>
-                        </label>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <video controls loop src="{{ url_for('static', filename='videos/preview.mp4') }}"
+                            class="embed-responsive-item wid-2" allowfullscreen></video>
                     </div>
-                    <div>
-                        <select name="song" class="form-select p-3 wid">
-                            <option value="1" selected>Select Song</option>
-                            <option value="2">Background music 1</option>
-                            <option value="3">Background music 2</option>
-                            <option value="4">Background music 3</option>
-                            <option value="5">Background music 4</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="container text-center">
-                <input type="submit" class="music_selection_button">
-            </div>
-        </form>
-    </div>
-    <h2 class="mt-5">Video preview</h2>
-    <div class="container text-center">
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="embed-responsive embed-responsive-16by9">
-                    <video controls loop src="{{ url_for('static', filename='videos/preview.mp4') }}"
-                        class="embed-responsive-item wid-2" allowfullscreen></video>
                 </div>
             </div>
         </div>
-    </div>
-    <h2>Select Resolution</h2>
-    <div class="output_settings">
-        <form action="/action_page.php">
-            <div class="container text-center">
-                <div class="d-flex flex-row justify-content-center p-4">
-                    <div>
-                        <label for="song" class="mt-3">
-                            <h4>Choose Resolution :</h4>
-                        </label>
-                    </div>
-                    <div>
-                        <select id="song" name="song" class="form-select p-3 wid-3">
-                            <option value="1" selected>240p</option>
-                            <option value="2">480p</option>
-                            <option value="3">720p</option>
-                            <option value="4">1080p</option>
-                        </select>
+        <h2>Select Resolution</h2>
+        <div class="output_settings">
+            <form action="/action_page.php">
+                <div class="container text-center">
+                    <div class="d-flex flex-row justify-content-center p-4">
+                        <div>
+                            <label for="song" class="mt-3">
+                                <h4>Choose Resolution :</h4>
+                            </label>
+                        </div>
+                        <div>
+                            <select id="song" name="song" class="form-select p-3 wid-3">
+                                <option value="1" selected>240p</option>
+                                <option value="2">480p</option>
+                                <option value="3">720p</option>
+                                <option value="4">1080p</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="container text-center">
-                <input type="submit" class="music_selection_button">
-            </div>
-        </form>
-    </div>
-    <h2>Download Video</h2>
-    <div class="extract">
-        <button class="music_selection_button">Download</button>
-    </div>
+                <div class="container text-center">
+                    <input type="submit" class="music_selection_button">
+                </div>
+            </form>
+        </div>
+        <h2>Download Video</h2>
+        <div class="extract">
+            <button class="music_selection_button">Download</button>
+        </div>
 
 
 </body>
