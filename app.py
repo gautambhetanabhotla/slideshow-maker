@@ -14,8 +14,8 @@ from PIL.ExifTags import TAGS
 import shutil
 import copy
 
-dbusername = "root"
-dbpassword = "Aryamah@12"
+dbusername = "ravi"
+dbpassword = "password"
 
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -248,9 +248,8 @@ def profile():
     db6.close()
     connection6.close()
     return render_template("profile.html",username=username,name=Name["name"],mail=Mail["email"])
+
 @app.route("/uploadimages", methods = ["POST"])
-
-
 def uploadimages():
     global images, username
     
