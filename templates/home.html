@@ -45,7 +45,7 @@
             </form>
         </div>
     </div>
-    <form action="/video" id="my-form">
+    <form action="/video" id="my-form" method = "GET">
         <div class="container rounded mt-5 text-center">
             <div class="row d-flex flex-row justify-content-between rounded p-3">
                 {% for file_name in source_file %}
@@ -79,9 +79,9 @@
                 alert("Please select at least one image to delete.");
                 return;
             }
-            document.getElementById("my-form").action = "/delete";
+            document.getElementById("my-form").action = "/deleteimages";
             document.getElementById("my-form").submit();
-            window.location.href = "/delete";
+            window.location.href = "/deleteimages";
         });
         document.getElementById("create_video_button").addEventListener("click", function () {
             if (document.querySelectorAll('input[name^="chkbox"]:checked').length === 0) {
