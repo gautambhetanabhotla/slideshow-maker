@@ -112,8 +112,13 @@ def login():
 
 @app.route("/signup")
 def signup():
-	return render_template("signup.html")
-
+    token = request.cookies.get('jwt_token')
+    if token:
+        response = make_response(render_template("signup.html"))
+        response.delete_cookie('jwt_token')
+        return response
+    
+    return render_template("signup.html")
 @app.route("/home")
 def home():
 	if not os.path.exists("./static/renders"):
@@ -225,49 +230,69 @@ def video():
     return render_template('video.html', image_files=image_files)
     
 @app.route("/uploadimages", methods = ["POST"])
+
+
 def uploadimages():
-	global images, username
-	if request.method == 'POST':
-		if 'file' not in request.files:
-			flash('No file part')
-			return redirect("/home", 301)
-		files = request.files.getlist("file")
-		if len(files)==0 :
-			flash('No selected file')
-			return redirect("/home", 301)
-			
-		
-		for file in files:
-			# If the user does not select a file, the browser submits an
-        	# empty file without a filename
-			if file.filename == '':
-				flash('No selected file')
-				return redirect("/home", 301)
-			# file2 = copy.deepcopy(file)
-			# i = Image.open(file2)
-			# exifdata = i._getexif()
-			# metadata = { TAGS[k]: v for k, v in exifdata.items() if k in TAGS and type(v) not in [bytes, TiffImagePlugin.IFDRational] }
-			metadata = {"null": "null"}
-			# for tagid in exifdata:
-			# 	tagname = TAGS.get(tagid, tagid)
-			# 	value = exifdata.get(tagid)
-			# 	metadata[tagname] = value
-			blob = file.read()
-			connection6 = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
-			if not connection6.open:
-				return "null connection"
-			db6 = connection6.cursor(pymysql.cursors.DictCursor)
-			db6.execute("USE existentia")
-			connection6.commit()
-			db6.execute("INSERT INTO images VALUES(%s, %s, %s, %s)", (username, int(len(images)) + 1, blob, json.dumps(metadata)))
-			connection6.commit()
-			db6.execute("SELECT username, image_id, metadata FROM images")
-			images = db6.fetchall()
-			connection6.commit()
-			db6.close()
-			connection6.close()
-		return redirect("/home", 301)
-	
+    global images, username
+    
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect("/home", 301)
+        
+        files = request.files.getlist("file")
+        
+        if len(files) == 0:
+            flash('No selected file')
+            return redirect("/home", 301)
+        
+        for file in files:
+            if file.filename == '':
+                flash('No selected file')
+                return redirect("/home", 301)
+            
+            blob = file.read()
+            
+            
+            img = Image.open(io.BytesIO(blob))
+            metadata = {
+    "width": img.width,
+    "height": img.height,
+    "format": img.format,
+    "mode": img.mode,  
+    "dpi": img.info.get("dpi"), 
+    "compression": img.info.get("compression"), 
+    "exif": img.info.get("exif"),
+    "icc_profile": img.info.get("icc_profile"), 
+    "transparency": img.info.get("transparency"), 
+    "color_palette": img.palette, 
+    "layers": img.n_frames, 
+    "transparent_color": img.info.get("transparency"), 
+    
+}
+
+            metadata_json = json.dumps(metadata)
+            
+            
+            connection = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
+            if not connection.open:
+                return "null connection"
+            
+            db = connection.cursor(pymysql.cursors.DictCursor)
+            db.execute("USE existentia")
+            db.execute("INSERT INTO images VALUES(%s, %s, %s, %s)", (username, int(len(images)) + 1, blob, metadata_json))
+            connection.commit()
+            
+           
+            db.execute("SELECT username, image_id, metadata FROM images")
+            images = db.fetchall()
+            connection.commit()
+            
+            db.close()
+            connection.close()
+        
+        return redirect("/home", 301)
+
 @app.route("/logout")
 def logout_and_delete():
     image_folder = 'static/images'
