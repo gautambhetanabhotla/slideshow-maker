@@ -14,6 +14,9 @@ from PIL.ExifTags import TAGS
 import shutil
 import copy
 
+dbusername = "root"
+dbpassword = "Aryamah@12"
+
 def hashed(s):
 	pb = s.encode('utf-8')
 	hash_object = hashlib.sha256(pb)
@@ -21,7 +24,7 @@ def hashed(s):
 	return hex_dig
 
 def initialise_database():
-	connection = pymysql.connect(host='localhost', user='ravi', password='password')
+	connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
 	db = connection.cursor(pymysql.cursors.DictCursor)
 	db.execute("CREATE DATABASE IF NOT EXISTS existentia")
 	connection.commit()
@@ -53,7 +56,7 @@ audios = []
 
 def getfromdatabase():
 	global users, images, audios
-	connection2 = pymysql.connect(host='localhost', user='ravi', password='password')
+	connection2 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
 	db2 = connection2.cursor(pymysql.cursors.DictCursor)
 	db2.execute("USE existentia")
 	connection2.commit()
@@ -124,7 +127,7 @@ def home():
 	if not os.path.exists("./static/renders"):
 		os.mkdir("./static/renders")
 	global username
-	connection3 = pymysql.connect(host='localhost', user='ravi', password='password')
+	connection3 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
 	db3 = connection3.cursor(pymysql.cursors.DictCursor)
 	db3.execute("USE existentia")
 	connection3.commit()
@@ -150,7 +153,7 @@ def home():
 	else:
 		if username == "":
 			return "null username"
-		connection4 = pymysql.connect(host='localhost', user='ravi', password='password')
+		connection4 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
 		db4 = connection4.cursor(pymysql.cursors.DictCursor)
 		db4.execute("USE existentia")
 		connection4.commit()
@@ -192,7 +195,7 @@ def processsignuprequest():
 				flash("An account with this username already exists. Please choose a different username.")
 				return render_template("signup.html")
 		else:
-			connection5 = pymysql.connect(host='localhost', user='ravi', password='password')
+			connection5 = pymysql.connect(host='localhost', user=dbusername, password='password')
 			db5 = connection5.cursor(pymysql.cursors.DictCursor)
 			db5.execute("USE existentia")
 			connection5.commit()
@@ -225,11 +228,14 @@ def move_files():
 
 @app.route("/video", methods = ['POST', 'GET'])
 def video():
-	return render_template("video.html")
+    image_folder = './static/images'
+    image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
+    return render_template('video.html', image_files=image_files)
+    
 
 @app.route("/profile")
 def profile():
-    connection6 = pymysql.connect(host='localhost', user='ravi', password='password')
+    connection6 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
     db6 = connection6.cursor(pymysql.cursors.DictCursor)
     db6.execute("USE existentia")
     connection6.commit()
@@ -287,7 +293,7 @@ def uploadimages():
             metadata_json = json.dumps(metadata)
             
             
-            connection = pymysql.connect(host='localhost', user='root', password='Aryamah@12')
+            connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
             if not connection.open:
                 return "null connection"
             
