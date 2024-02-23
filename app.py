@@ -12,6 +12,7 @@ from PIL import Image, TiffImagePlugin
 import io
 import sys
 from PIL.ExifTags import TAGS
+import shutil
 import copy
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -204,10 +205,25 @@ def admin():
 	global users, images, audios
 	return [users, images, audios]
 
+@app.route('/move_files', methods=['POST'])
+def move_files():
+    data = request.get_json()
+    files = data.get('files', [])
+    destination_folder = './static/images'  # Specify the destination folder
+    
+    for file_name in files:
+        source_path = os.path.join('./static/renders', file_name)  # Specify the source folder
+        destination_path = os.path.join(destination_folder, file_name)
+        shutil.move(source_path, destination_path)
+    
+    return jsonify({'message': 'Files moved successfully'})
+
 @app.route("/video", methods = ['POST', 'GET'])
 def video():
-	return render_template("video.html")
-
+    image_folder = './static/images'
+    image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
+    return render_template('video.html', image_files=image_files)
+    
 @app.route("/uploadimages", methods = ["POST"])
 def uploadimages():
 	global images, username
@@ -216,6 +232,11 @@ def uploadimages():
 			flash('No file part')
 			return redirect("/home", 301)
 		files = request.files.getlist("file")
+		if len(files)==0 :
+			flash('No selected file')
+			return redirect("/home", 301)
+			
+		
 		for file in files:
 			# If the user does not select a file, the browser submits an
         	# empty file without a filename
@@ -248,13 +269,32 @@ def uploadimages():
 		return redirect("/home", 301)
 	
 @app.route("/logout")
-def delete_cookie():
-	global username
-	response = redirect("/")
-	response.delete_cookie('jwt_token')
-	erasedirectory("./static/renders")
-	username = ""
-	return response
+def logout_and_delete():
+    image_folder = 'static/images'
+    
+    # Delete all files in the images folder
+    for filename in os.listdir(image_folder):
+        file_path = os.path.join(image_folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
+    
+    # Delete the JWT token cookie
+    response = redirect("/")
+    response.delete_cookie('jwt_token')
+    
+    # Delete all files in the renders folder
+    erasedirectory("./static/renders")
+    
+    # Reset the global variable
+    global username
+    username = ""
+    
+    return response
 
 @app.route("/deleteimages", methods = ["POST", "GET"])
 def deleteimages():
