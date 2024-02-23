@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, make_response, url_for
+from flask import Flask, render_template, request, redirect, flash, make_response, url_for, jsonify
 import json
 import jwt
 from matplotlib.pylab import f
@@ -20,11 +20,9 @@ def hashed(s):
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
-connection = pymysql.connect(host='localhost', user='ravi', password='password')
-db = connection.cursor(pymysql.cursors.DictCursor)
-
 def initialise_database():
-	global db, connection
+	connection = pymysql.connect(host='localhost', user='gautam', password='haha')
+	db = connection.cursor(pymysql.cursors.DictCursor)
 	db.execute("CREATE DATABASE IF NOT EXISTS existentia")
 	connection.commit()
 	db.execute("USE existentia")
@@ -35,6 +33,8 @@ def initialise_database():
 	connection.commit()
 	db.execute("CREATE TABLE IF NOT EXISTS audios(username VARCHAR(255), audio_id INT, audio LONGBLOB, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))")
 	connection.commit()
+	db.close()
+	connection.close()
 
 initialise_database()
 
@@ -53,15 +53,21 @@ audios = []
 
 def getfromdatabase():
 	global users, images, audios
-	db.execute("SELECT * FROM users")
-	users = db.fetchall()
-	connection.commit()
-	db.execute("SELECT username, image_id, metadata FROM images")
-	images = db.fetchall()
-	connection.commit()
-	db.execute("SELECT username, audio_id, metadata FROM audios")
-	audios = db.fetchall()
-	connection.commit()
+	connection2 = pymysql.connect(host='localhost', user='gautam', password='haha')
+	db2 = connection2.cursor(pymysql.cursors.DictCursor)
+	db2.execute("USE existentia")
+	connection2.commit()
+	db2.execute("SELECT * FROM users")
+	users = db2.fetchall()
+	connection2.commit()
+	db2.execute("SELECT username, image_id, metadata FROM images")
+	images = db2.fetchall()
+	connection2.commit()
+	db2.execute("SELECT username, audio_id, metadata FROM audios")
+	audios = db2.fetchall()
+	connection2.commit()
+	db2.close()
+	connection2.close()
 
 getfromdatabase()
 
@@ -112,10 +118,16 @@ def signup():
 def home():
 	if not os.path.exists("./static/renders"):
 		os.mkdir("./static/renders")
-	global db, username, connection
-	db.execute("SELECT image_id FROM images WHERE username = %s", (username))
-	userimages = db.fetchall()
-	connection.commit()
+	global username
+	connection3 = pymysql.connect(host='localhost', user='gautam', password='haha')
+	db3 = connection3.cursor(pymysql.cursors.DictCursor)
+	db3.execute("USE existentia")
+	connection3.commit()
+	db3.execute("SELECT image_id FROM images WHERE username = %s", (username))
+	userimages = db3.fetchall()
+	connection3.commit()
+	db3.close()
+	connection3.close()
 	numfiles = len(os.listdir("./static/renders"))
 	if numfiles != 0:
 		for file in os.listdir("./static/renders"):
@@ -131,13 +143,19 @@ def home():
 	else:
 		if username == "":
 			return "null username"
-		db.execute("SELECT image, image_id from images WHERE username = %s", (username))
-		pictures = db.fetchall()
-		connection.commit()
+		connection4 = pymysql.connect(host='localhost', user='gautam', password='haha')
+		db4 = connection4.cursor(pymysql.cursors.DictCursor)
+		db4.execute("USE existentia")
+		connection4.commit()
+		db4.execute("SELECT image, image_id from images WHERE username = %s", (username))
+		pictures = db4.fetchall()
+		connection4.commit()
+		db4.close()
+		connection4.close()
 		for picture in pictures:
 			img = Image.open(io.BytesIO(picture['image']))
 			img.save(f"./static/renders/{username}_{picture['image_id']}.png")
-	return render_template("home.html")
+	return render_template("home.html", source_file = os.listdir("./static/renders"))
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
@@ -145,7 +163,6 @@ def processloginrequest():
         global username
         username = request.form["username"]
         password = request.form["password"]
-        i = 0
         for user in users:
             if user["username"] == username and user["password"] == hashed(password):
                 token = jwt.encode({'username': username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
@@ -157,7 +174,7 @@ def processloginrequest():
 	
 @app.route("/requestsignup", methods = ['POST'])
 def processsignuprequest():
-	global users, db, connection
+	global users
 	if request.method == 'POST':
 		username = request.form["username"]
 		password = request.form["password"]
@@ -168,11 +185,17 @@ def processsignuprequest():
 				flash("An account with this username already exists. Please choose a different username.")
 				return render_template("signup.html")
 		else:
-			db.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
-			connection.commit()
-			db.execute("SELECT * FROM users")
-			users = db.fetchall()
-			connection.commit()
+			connection5 = pymysql.connect(host='localhost', user='gautam', password='haha')
+			db5 = connection5.cursor(pymysql.cursors.DictCursor)
+			db5.execute("USE existentia")
+			connection5.commit()
+			db5.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
+			connection5.commit()
+			db5.execute("SELECT * FROM users")
+			users = db5.fetchall()
+			connection5.commit()
+			db5.close()
+			connection5.close()
 			return redirect("/login", 301)
 
 @app.route("/admin")
@@ -180,13 +203,13 @@ def admin():
 	global users, images, audios
 	return [users, images, audios]
 
-@app.route("/video")
+@app.route("/video", methods = ['POST', 'GET'])
 def video():
 	return render_template("video.html")
 
 @app.route("/uploadimages", methods = ["POST"])
 def uploadimages():
-	global images, username, db, connection
+	global images, username
 	if request.method == 'POST':
 		if 'file' not in request.files:
 			flash('No file part')
@@ -208,11 +231,19 @@ def uploadimages():
 			# 	value = exifdata.get(tagid)
 			# 	metadata[tagname] = value
 			blob = file.read()
-			db.execute("INSERT INTO images VALUES(%s, %s, %s, %s)", (username, int(len(images)) + 1, blob, json.dumps(metadata)))
-			connection.commit()
-			db.execute("SELECT username, image_id, metadata FROM images")
-			images = db.fetchall()
-			connection.commit()
+			connection6 = pymysql.connect(host='localhost', user='gautam', password='haha')
+			if not connection6.open:
+				return "null connection"
+			db6 = connection6.cursor(pymysql.cursors.DictCursor)
+			db6.execute("USE existentia")
+			connection6.commit()
+			db6.execute("INSERT INTO images VALUES(%s, %s, %s, %s)", (username, int(len(images)) + 1, blob, json.dumps(metadata)))
+			connection6.commit()
+			db6.execute("SELECT username, image_id, metadata FROM images")
+			images = db6.fetchall()
+			connection6.commit()
+			db6.close()
+			connection6.close()
 		return redirect("/home", 301)
 	
 @app.route("/logout")
@@ -223,6 +254,16 @@ def delete_cookie():
 	erasedirectory("./static/renders")
 	username = ""
 	return response
+
+@app.route("/deleteimages", methods = ["POST", "GET"])
+def deleteimages():
+	global username
+	if request.method == 'POST':
+		return "post request"
+	elif request.method == 'GET':
+		return jsonify(request)
+	else:
+		return str(request.method)
 
 if __name__ == "__main__":
 	app.run(debug = True)
