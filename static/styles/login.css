@@ -1,0 +1,41 @@
+.bg {
+    position: fixed;
+    z-index: -1;
+}
+
+form {
+    width: 400px;
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    margin-left: 60%;
+    border-radius: 30px;
+}
+
+label {
+    color: white;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 30px;
+    margin: 10px;
+    margin-right: 20px;
+    background-color: black;
+    color: white;
+    font-family: "Poppins", sans-serif;
+}
+
+.foorm {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 20vh;
+    margin-top: 50%;
+}
+
+button {
+    font-family: "Poppins", sans-serif;
+    margin: 50px;
+}
