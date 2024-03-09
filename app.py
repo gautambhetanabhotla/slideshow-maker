@@ -14,8 +14,8 @@ from PIL.ExifTags import TAGS
 import shutil
 import copy
 
-dbusername = "ravi"
-dbpassword = "password"
+dbusername = json.loads(open("dbcredentials.json").read())["username"]
+dbpassword = json.loads(open("dbcredentials.json").read())["password"]
 
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -120,8 +120,8 @@ def signup():
         response = make_response(render_template("signup.html"))
         response.delete_cookie('jwt_token')
         return response
-    
     return render_template("signup.html")
+
 @app.route("/home")
 def home():
 	if not os.path.exists("./static/renders"):
@@ -136,9 +136,7 @@ def home():
 	connection3.commit()
 	db3.close()
 	connection3.close()
-	numfiles = len(os.listdir("./static/renders"))
-	
-		
+	numfiles = len(os.listdir("./static/renders"))	
 	if numfiles != 0 :
 		for file in os.listdir("./static/renders"):
 			if username == "":
@@ -195,7 +193,7 @@ def processsignuprequest():
 				flash("An account with this username already exists. Please choose a different username.")
 				return render_template("signup.html")
 		else:
-			connection5 = pymysql.connect(host='localhost', user=dbusername, password='password')
+			connection5 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
 			db5 = connection5.cursor(pymysql.cursors.DictCursor)
 			db5.execute("USE existentia")
 			connection5.commit()
@@ -231,11 +229,10 @@ def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     return render_template('video.html', image_files=image_files)
-    
 
 @app.route("/profile")
 def profile():
-    connection6 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
+    connection6 = pymysql.connect(host='localhost', user = dbusername, password = dbpassword)
     db6 = connection6.cursor(pymysql.cursors.DictCursor)
     db6.execute("USE existentia")
     connection6.commit()
@@ -247,12 +244,12 @@ def profile():
     connection6.commit()
     db6.close()
     connection6.close()
-    return render_template("profile.html",username=username,name=Name["name"],mail=Mail["email"])
+    return render_template("profile.html", username = username, name = Name["name"], mail = Mail["email"])
 
 @app.route("/uploadimages", methods = ["POST"])
 def uploadimages():
     global images, username
-    
+
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
@@ -270,45 +267,36 @@ def uploadimages():
                 return redirect("/home", 301)
             
             blob = file.read()
-            
-            
             img = Image.open(io.BytesIO(blob))
             metadata = {
-    "width": img.width,
-    "height": img.height,
-    "format": img.format,
-    "mode": img.mode,  
-    "dpi": img.info.get("dpi"), 
-    "compression": img.info.get("compression"), 
-    "exif": img.info.get("exif"),
-    "icc_profile": img.info.get("icc_profile"), 
-    "transparency": img.info.get("transparency"), 
-    "color_palette": img.palette, 
-    "layers": img.n_frames, 
-    "transparent_color": img.info.get("transparency"), 
-    
-}
+                "width": img.width,
+                "height": img.height,
+                "format": img.format,
+                "mode": img.mode,  
+                "dpi": img.info.get("dpi"), 
+                "compression": img.info.get("compression"), 
+                "exif": img.info.get("exif"),
+                "icc_profile": img.info.get("icc_profile"), 
+                "transparency": img.info.get("transparency"), 
+                "color_palette": img.palette, 
+                "layers": img.n_frames, 
+                "transparent_color": img.info.get("transparency"),    
+            }
 
             metadata_json = json.dumps(metadata)
-            
             
             connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
             if not connection.open:
                 return "null connection"
-            
             db = connection.cursor(pymysql.cursors.DictCursor)
             db.execute("USE existentia")
             db.execute("INSERT INTO images VALUES(%s, %s, %s, %s)", (username, int(len(images)) + 1, blob, metadata_json))
             connection.commit()
-            
-           
             db.execute("SELECT username, image_id, metadata FROM images")
             images = db.fetchall()
             connection.commit()
-            
             db.close()
             connection.close()
-        
         return redirect("/home", 301)
 
 @app.route("/logout")
@@ -338,16 +326,6 @@ def logout_and_delete():
     username = ""
     
     return response
-
-@app.route("/deleteimages", methods = ["POST", "GET"])
-def deleteimages():
-	global username
-	if request.method == 'POST':
-		return "post request"
-	elif request.method == 'GET':
-		return jsonify(request)
-	else:
-		return str(request.method)
 
 if __name__ == "__main__":
 	app.run(debug = True)

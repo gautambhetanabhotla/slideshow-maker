@@ -7,3 +7,5 @@ package-lock.json
 package.json
 renders
 static/renders
+static/images
+dbcredentials.json
