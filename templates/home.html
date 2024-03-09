@@ -2,24 +2,27 @@
 <html lang="en">
 
 <head>
-    <title>Existentia Slideshow maker</title>
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/home.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-wvoo7sBLx41+dmoJPcbz6/1x4LNPp7TIq9h2c+q6UqD6wTQ2mt8J/7TVus7T8UcclYef3rElXZ7eUJjRzS8bSg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel = "icon" href = "{{ url_for('static', filename='icons/home.svg') }}" type = "image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 
 <body>
-
-    <nav class="navbar navbar-expand-lg navbar p-1" style="background-color: black;">
+    <div class="bg"><img src="{{ url_for('static', filename='icons/space.png') }}" alt="Space" style="height: 100%; width: auto;"></img></div>
+    <nav class="navbar navbar-expand-lg navbar p-0 navvv" style="background-color: black;">
         <div class="container-fluid">
             <a class="navbar-brand" href="#" style="color: white;">
-                <h2>SlideShow Maker</h2>
+                <h3>&nbsp;Home</h3>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,82 +45,154 @@
             </div>
         </div>
     </nav>
-
-    <div class="container text-center p-3" style="color:darkorange;">
-        <h1>Slideshow maker</h1>
+    <div class="container col mt-5 uploadimages">
+        <form action = "/uploadimages" enctype="multipart/form-data" method="POST">
+            <div class="container col d-flex w-50">
+                <div class="container">
+                    <div id="drop-area" class="border rounded d-flex justify-content-center align-items-center m-5"
+                        style="height: 200px; cursor: pointer">
+                        <div class="text-center p-5">
+                            <i class="bi bi-cloud-arrow-up-fill text-primary" style="font-size: 48px"></i>
+                            <p class="mt-3">
+                                Drag and drop your image here or click to select a file.
+                            </p>
+                        </div>
+                    </div>
+                    <input type="file" name = "file" id="fileElem" multiple accept="image/*" onchange = "readURL(this)" class="d-none" />
+                    <div id = "gallery" class = "container"></div>
+                </div>
+            </div>
+            <div class = "container col d-flex justify-content-center m-2">
+                <input class = "btn btn-lg btn-outline-light submit m-1" type = "submit" value = "Upload">
+                <button type="button" class="btn btn-outline-light btn-lg m-1" id="create_video_button">Create Video</button>
+            </div>
+        </form>
     </div>
-    <div>
-        <div class="container text-center p-3">
-            <h2>Upload images here</h2>
-        </div>
-        <div class="uploadimages">
-            <form action="/uploadimages" enctype="multipart/form-data" method="POST">
-                <input class="file-upload-input" type="file" name="file" onchange="readURL(this)" accept="Image/*"
-                    multiple>
-                <label for="file">Choose a file</label>
-                <input type="submit" value="Upload" class="submit">
+    <div class="container-fluid d-flex justify-content-center">
+        <div class="container p-5 m-5 gal">
+            <form action="/video" id="my-form" method="GET">
+                <div class="container rounded m-5 text-center">
+                    <div class="row d-flex flex-row justify-content-between align-items-center rounded ">
+                        {% for file_name in source_file %}
+                        <div class="col rounded m-5">
+                            <input type="checkbox" id="check{{ loop.index0 }}" name="chkbox{{ loop.index0 }}" />
+                            <label for="check{{ loop.index0 }}">
+                                <img src="{{ url_for('static', filename='renders/' + file_name) }}" alt="Image"
+                                    style="object-fit: cover;width: 350px;height:auto;">
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="container p-5">
+                        <div class="row ">
+                            <div class="col text-center">
+                                <button type="button" class="btn btn-lg btn-primary" id="create_video_button">Create
+                                    Video</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
-    <form action="/video" id="my-form" method="GET">
-        <div class="container rounded mt-5 text-center">
-            <div class="row d-flex flex-row justify-content-between align-items-center rounded ">
-                {% for file_name in source_file %}
-                <div class="col rounded">
-                    <input type="checkbox" id="check{{ loop.index0 }}" name="chkbox{{ loop.index0 }}" />
-                    <label for="check{{ loop.index0 }}">
-                        <img src="{{ url_for('static', filename='renders/' + file_name) }}" alt="Image"
-                            style="object-fit: cover;width: 350px;height:auto;">
-                    </label>
-                </div>
-                {% endfor %}
-            </div>
-            <div class="container  p-5">
-                <div class="row ">
-                    <div class="col text-center">
-                        <button type="button" class="btn btn-lg btn-primary" id="create_video_button">Create
-                            Video</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
 
 
     <script>      
-      document.getElementById("create_video_button").addEventListener("click", function () {
-    var selectedFiles = document.querySelectorAll('input[name^="chkbox"]:checked');
-    if (selectedFiles.length === 0) {
-        alert("Please select at least one file before creating a video.");
-        return;
-    }
-    
-    var fileNames = [];
-    selectedFiles.forEach(function (file) {
-        var label = file.nextElementSibling;
-        var imgSrc = label.querySelector('img').src;
-        var fileName = imgSrc.split('/').pop(); // Extract the file name
-        fileNames.push(fileName);
-    });
-    
-    fetch('/move_files', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ files: fileNames }),
-    })
-    .then(response => {
-        if (response.ok) {
-            window.location.href = "/video";
-        } else {
-            alert('Failed to move files.');
+    document.getElementById("create_video_button").addEventListener("click", function () {
+        var selectedFiles = document.querySelectorAll('input[name^="chkbox"]:checked');
+        if (selectedFiles.length === 0) {
+            alert("Please select at least one file before creating a video.");
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
+    
+        var fileNames = [];
+        selectedFiles.forEach(function (file) {
+            var label = file.nextElementSibling;
+            var imgSrc = label.querySelector('img').src;
+            var fileName = imgSrc.split('/').pop(); // Extract the file name
+            fileNames.push(fileName);
+            }
+        );
+    
+        fetch('/move_files', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ files: fileNames }),
+        })    
+        .then(response => {
+            if (response.ok) {
+                window.location.href = "/video";
+            } else {
+                alert('Failed to move files.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     });
-});
+
+    let dropArea = document.getElementById('drop-area');
+    let fileElem = document.getElementById('fileElem');
+    let gallery = document.getElementById('gallery');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function highlight(e) {
+        dropArea.classList.add('highlight');
+    }
+
+    function unhighlight(e) {
+        dropArea.classList.remove('highlight');
+    }
+
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        handleFiles(files);
+    }
+
+    dropArea.addEventListener('click', () => {
+        fileElem.click();
+    });
+
+    fileElem.addEventListener('change', function (e) {
+        handleFiles(this.files);
+    });
+
+    function handleFiles(files) {
+        files = [...files];
+        files.forEach(previewFile);
+    }
+
+    function previewFile(file) {
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function () {
+        let img = document.createElement('img');
+        img.src = reader.result;
+        gallery.appendChild(img);
+        }
+    }
 
     </script>
 
