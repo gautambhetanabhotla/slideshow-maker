@@ -5,6 +5,5 @@ datetime
 PIL
 io
 sys
-PIL
 shutil
 copy
