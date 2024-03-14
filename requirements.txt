@@ -2,6 +2,5 @@ flask
 jwt
 pymysql
 datetime
-sys
 shutil
 copy
