@@ -14,7 +14,7 @@ from PIL.ExifTags import TAGS
 import shutil
 import copy
 
-dbusername = "ravi"
+dbusername = "root"
 dbpassword = "password"
 
 def hashed(s):
