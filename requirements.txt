@@ -1,5 +1,4 @@
 flask
-json
 jwt
 pymysql
 pymysql.cursors
