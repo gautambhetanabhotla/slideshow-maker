@@ -2,7 +2,6 @@ flask
 jwt
 pymysql
 datetime
-PIL
 io
 sys
 shutil
