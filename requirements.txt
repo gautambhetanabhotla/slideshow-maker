@@ -1,7 +1,6 @@
 flask
 jwt
 pymysql
-pymysql.cursors
 os
 datetime
 hashlib
@@ -9,6 +8,6 @@ cv2
 PIL
 io
 sys
-PIL.ExifTags
+PIL
 shutil
 copy
