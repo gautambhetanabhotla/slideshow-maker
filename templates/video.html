@@ -42,7 +42,7 @@
         <div class="container text-center">
             <div class="row d-flex">
                 {% for file_name in image_files %}
-                    <div class="col-4">
+                    <div class="col-4 p-3">
                         <img src="{{ url_for('static', filename='images/' + file_name) }}"
                             alt="Description of the image" width="110" height="110" class="rounded-4">
                             <form>
@@ -115,12 +115,13 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="embed-responsive embed-responsive-16by9">
-                        <video controls loop src="{{ url_for('static', filename='videos/newvideo.mp4') }}"
+                        <video controls loop src="{{ url_for('static', filename='videos/final.mp4') }}"
                             class="embed-responsive-item wid-2" allowfullscreen></video>
                     </div>
                 </div>
             </div>
         </div>
+        
         <h2>Select Resolution</h2>
         <div class="output_settings">
             <form action="/action_page.php">

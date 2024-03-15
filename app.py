@@ -11,6 +11,9 @@ from PIL import Image, TiffImagePlugin
 import io
 from PIL.ExifTags import TAGS
 import shutil
+import copy
+from moviepy.editor import *
+
 
 dbusername = json.loads(open("dbcredentials.json").read())["username"]
 dbpassword = json.loads(open("dbcredentials.json").read())["password"]
@@ -239,7 +242,29 @@ def move_files():
 def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
-    
+    path = './static/images'
+    output = './static/videos'
+    video_name = 'final.mp4'
+    audio_path = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
+    output_path = os.path.join(output, video_name) 
+    images_list = os.listdir(path)
+
+    clips = []
+    for image_path in images_list:
+        full_path = os.path.join(path, image_path)
+        clip = ImageClip(full_path).set_duration(2)
+        
+        clip = clip.set_start(clip.duration * 0.1).set_end(clip.duration * 0.9)  
+        clips.append(clip)
+    video_duration=len(clips)*2
+    video_clip = concatenate_videoclips(clips, method='compose')
+    video_clip.write_videofile(output_path, fps=24, remove_temp=True)
+    video_clip_with_audio = VideoFileClip(output_path).set_audio(None)  
+
+    video_clip_with_audio = video_clip_with_audio.set_audio(AudioFileClip(audio_path))
+    video_clip_with_audio=video_clip_with_audio.set_duration(video_duration)
+    video_clip_with_audio.write_videofile(output_path,fps=24,remove_temp=True)
+
     return render_template('video.html', image_files=image_files)
 
 @app.route("/profile")
