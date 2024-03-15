@@ -34,3 +34,19 @@
 p {
   color: white;
 }
+
+.highlight {
+  color: #fff;
+  animation: glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    backdrop-filter: blur(0px);
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #0077e6, 0 0 40px #00b8e6, 0 0 50px #2e00e6, 0 0 60px #e2ebf7, 0 0 70px #9a9a9a;
+  }
+  to {
+    backdrop-filter: blur(100px);
+    text-shadow: 0 0 20px #fff, 0 0 30px #26b8e4, 0 0 40px #1526d7, 0 0 50px #01187b, 0 0 60px #dcdfe6, 0 0 70px #ffffff, 0 0 80px #fbf9fa;
+  }
+}

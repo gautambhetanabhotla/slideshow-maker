@@ -9,13 +9,20 @@ import hashlib
 import cv2
 from PIL import Image, TiffImagePlugin
 import io
-import sys
 from PIL.ExifTags import TAGS
 import shutil
-import copy
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+logger.addHandler(handler)
 
 dbusername = json.loads(open("dbcredentials.json").read())["username"]
 dbpassword = json.loads(open("dbcredentials.json").read())["password"]
+
+def consolelog(s):
+    logger.info(s)
 
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -237,10 +244,10 @@ def profile():
     db6.execute("USE existentia")
     connection6.commit()
     db6.execute("SELECT name FROM users WHERE username=%s",(username))
-    Name=db6.fetchone()
+    Name = db6.fetchone()
     connection6.commit()
     db6.execute("SELECT email FROM users WHERE username=%s",(username))
-    Mail=db6.fetchone()
+    Mail = db6.fetchone()
     connection6.commit()
     db6.close()
     connection6.close()
@@ -263,7 +270,6 @@ def uploadimages():
         
         for file in files:
             if file.filename == '':
-                flash('No selected file')
                 return redirect("/home", 301)
             
             blob = file.read()
@@ -279,7 +285,7 @@ def uploadimages():
                 "icc_profile": img.info.get("icc_profile"), 
                 "transparency": img.info.get("transparency"), 
                 "color_palette": img.palette, 
-                "layers": img.n_frames, 
+                # "layers": img.n_frames, 
                 "transparent_color": img.info.get("transparency"),    
             }
 
