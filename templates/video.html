@@ -41,19 +41,18 @@
     <div>
         <div class="container text-center">
             <div class="row d-flex">
-                {% for file_name in image_files %}
+                <form method="post" action="{{ url_for('store_durations') }}">
+                    {% for file_name in image_files %}
                     <div class="col-4 p-3">
-                        <img src="{{ url_for('static', filename='images/' + file_name) }}"
-                            alt="Description of the image" width="110" height="110" class="rounded-4">
-                            <form>
-
-                                <label for="duration" >Set duration</label><br>
-                                <input type="text"  id="duration"  value="" ><br><br>
-                                
-                                <button type="submit" class="btn btn-outline-light btn-lg">Set</button>
-                            </form>
+                        <img src="{{ url_for('static', filename='images/' + file_name) }}" alt="Description of the image" style="width: 300px;height: auto;" class="rounded-4">
+                        <label for="duration_{{ loop.index }}" >Set duration for {{ file_name }}</label><br>
+                        <input type="text" name="duration_{{ loop.index }}" id="duration_{{ loop.index }}" value=""><br><br>
+                        <input type="hidden" name="image_file" value="{{ file_name }}">
+                        
                     </div>
-                {% endfor %}
+                    {% endfor %}
+                    <button type="submit" class="btn btn-outline-light btn-lg">Set</button>
+                </form>
             </div>
         </div>
         <div class="container text-center text-dark" style="padding: 2vw;">
@@ -105,19 +104,21 @@
                         </div>
                     </div>
                 </div>
+                
+            </form>
+            <form action="/ready_to_preview">
                 <div class="container text-center">
-                    <input type="submit" class="music_selection_button">
+                    
+                    <input type="submit" class="btn btn-outline-light btn-lg">
                 </div>
             </form>
+
         </div>
         <h2 class="mt-5">Video preview</h2>
         <div class="container text-center">
             <div class="row">
                 <div class="col-xs-12">
-                    <div class="embed-responsive embed-responsive-16by9">
-                        <video controls loop src="{{ url_for('static', filename='videos/final.mp4') }}"
-                            class="embed-responsive-item wid-2" allowfullscreen></video>
-                    </div>
+                    {{ video_html | safe }}
                 </div>
             </div>
         </div>
