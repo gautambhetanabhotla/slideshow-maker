@@ -2,7 +2,12 @@
     margin: 0;
     padding: 0;
     border: 0;
+    color: white;
+}
 
+.bg {
+    position: fixed;
+    z-index: -1;
 }
 
 .heading {
@@ -139,10 +144,20 @@ label img {
     background-color: black;
     transform: scale(1);
 }
+input {
+    width: 20%;
+    padding: 8px;
+    border-radius: 30px;
+    margin: 10px;
+    margin-right: 20px;
+    background-color: rgb(246, 243, 243);
+    color: rgb(0, 0, 0);
+    font-family: "Poppins", sans-serif;
+    text-align: center;
+}
 
 :checked+label img {
     transform: scale(0.9);
     box-shadow: 0 0 5px #333;
     z-index: -1;
 }
-
