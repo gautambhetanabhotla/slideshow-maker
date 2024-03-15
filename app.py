@@ -256,46 +256,48 @@ def store_durations():
 
 
 @app.route("/ready_to_preview",methods=['POST','GET'])
-def previewvideo():
+def videopreview():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
-    
-
     path = './static/images'
     output = './static/videos'
-    video_name = 'final.mp4'
-    audio_path = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
-    output_path = os.path.join(output, video_name) 
-    images_list = os.listdir(path)
+    nameof_video = '/final.mp4'
+    audiofpath='./static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3' 
+    outputpath = output+nameof_video
+    imageslist = os.listdir(path)
 
-    clips = []
-    for image_path in images_list:
-        full_path = os.path.join(path, image_path)
-        clip = ImageClip(full_path).set_duration(2)
-        
-        clip = clip.set_start(clip.duration * 0.1).set_end(clip.duration * 0.9)  
-        clips.append(clip)
-    video_duration=len(clips)*2
-    video_clip = concatenate_videoclips(clips, method='compose')
-    video_clip.write_videofile(output_path, fps=24, remove_temp=True)
-    video_clip_with_audio = VideoFileClip(output_path).set_audio(None)  
+    j = 0
+    for i in imageslist:
+        i = path + '/' + i
+        imageslist[j] = i
+        j += 1
 
-    video_clip_with_audio = video_clip_with_audio.set_audio(AudioFileClip(audio_path))
-    video_clip_with_audio=video_clip_with_audio.set_duration(video_duration)
-    video_clip_with_audio.write_videofile(output_path,fps=24,remove_temp=True)
-    video_path = "static/videos/final.mp4"
+    clips=[]
+    for i in range(len(imageslist)):
+        clips.append(ImageClip(imageslist[i]).set_duration(2))
+    video_clip=concatenate_videoclips(clips,method='compose')
 
-    if os.path.exists(video_path):
+    videofile=VideoFileClip(outputpath)
+    audio_bg=AudioFileClip(audiofpath)
+    final_audio=audio_bg
+
+
+    video_clip=video_clip.set_audio(final_audio)
+    video_clip.write_videofile(outputpath,fps=24,remove_temp=True)
+    if os.path.exists(outputpath):
         video_html = f'''
-        <div class="embed-responsive embed-responsive-16by9">
-            <video controls loop src="{{ url_for('static', filename='videos/final.mp4') }}"
-                class="embed-responsive-item wid-2" allowfullscreen></video>
-        </div>
+      <div class="embed-responsive embed-responsive-16by9">
+        <video width="320" height="240" controls>
+  <source src="static/videos/final.mp4" type="video/mp4">
+
+Your browser does not support the video tag.
+</video>
+      </div>
         '''
     else:
         video_html = f'''<h1>Video will be previewed here</h1>'''
 
-    return render_template('video.html',image_files=image_files, video_html=video_html)
+    return render_template('video.html', video_html=video_html,image_files=image_files)
 
   
     
@@ -391,6 +393,7 @@ def logout_and_delete():
     
     # Delete all files in the renders folder
     erasedirectory("./static/renders")
+    erasedirectory("./static/images")
     
     # Reset the global variable
     global username
