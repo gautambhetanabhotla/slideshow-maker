@@ -230,6 +230,7 @@ def move_files():
 def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
+
     path = './static/images'
     output = './static/videos'
     video_name = 'final.mp4'
@@ -252,6 +253,7 @@ def video():
     video_clip_with_audio = video_clip_with_audio.set_audio(AudioFileClip(audio_path))
     video_clip_with_audio=video_clip_with_audio.set_duration(video_duration)
     video_clip_with_audio.write_videofile(output_path,fps=24,remove_temp=True)
+
 
     return render_template('video.html', image_files=image_files)
 
