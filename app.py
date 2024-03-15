@@ -239,6 +239,7 @@ def move_files():
 def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
+    
     return render_template('video.html', image_files=image_files)
 
 @app.route("/profile")
