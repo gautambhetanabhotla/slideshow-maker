@@ -2,7 +2,12 @@
     margin: 0;
     padding: 0;
     border: 0;
+    color: white;
+}
 
+.bg {
+    position: fixed;
+    z-index: -1;
 }
 
 .heading {
@@ -145,4 +150,3 @@ label img {
     box-shadow: 0 0 5px #333;
     z-index: -1;
 }
-
