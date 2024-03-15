@@ -56,7 +56,7 @@ users = []
 images = []
 audios = []
 
-def getfromdatabase():
+def getfromdatabase():  
 	global users, images, audios
 	connection2 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
 	db2 = connection2.cursor(pymysql.cursors.DictCursor)
@@ -230,6 +230,24 @@ def move_files():
 def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
+    return render_template('video.html', image_files=image_files)
+image_durations = []
+
+@app.route('/store_durations', methods=['POST'])
+def store_durations():
+    for file_name in request.form.getlist('image_file'):
+        duration_key = 'duration_' + str(request.form['image_file'].index(file_name) + 1)
+        duration_value = request.form[duration_key]
+        image_durations.append({'image_file': file_name, 'duration': duration_value})
+    return jsonify({'message': 'Durations stored successfully.'})
+
+
+
+@app.route("/ready_to_preview",methods=['POST','GET'])
+def previewvideo():
+    image_folder = './static/images'
+    image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
+    
 
     path = './static/images'
     output = './static/videos'
@@ -253,9 +271,22 @@ def video():
     video_clip_with_audio = video_clip_with_audio.set_audio(AudioFileClip(audio_path))
     video_clip_with_audio=video_clip_with_audio.set_duration(video_duration)
     video_clip_with_audio.write_videofile(output_path,fps=24,remove_temp=True)
+    video_path = "static/videos/final.mp4"
 
+    if os.path.exists(video_path):
+        video_html = f'''
+        <div class="embed-responsive embed-responsive-16by9">
+            <video controls loop src="{{ url_for('static', filename='videos/final.mp4') }}"
+                class="embed-responsive-item wid-2" allowfullscreen></video>
+        </div>
+        '''
+    else:
+        video_html = f'''<h1>Video will be previewed here</h1>'''
 
-    return render_template('video.html', image_files=image_files)
+    return render_template('video.html',image_files=image_files, video_html=video_html)
+
+  
+    
 
 @app.route("/profile")
 def profile():
