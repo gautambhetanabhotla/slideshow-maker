@@ -21,7 +21,7 @@
         <div>
             <div class="container text-center">
                 <div class="row d-flex">
-                    <form method="post" action="{{ url_for('store_durations') }}">
+                    <form method="post" action="/ready_to_preview">
                         <div class="container row gal">
                             {% for file_name in image_files %}
                             <div class="col-4 p-3">
@@ -67,7 +67,7 @@
                 </div>
             </div>
             <div>
-                <form action="/upload" method="POST">
+                <form action="/ready_to_preview" method="POST">
                     <div class="container text-center">
                         <div class="d-flex flex-row justify-content-center p-4">
                             <div>
@@ -83,16 +83,17 @@
                                     <option value="4">Background music 3</option>
                                     <option value="5">Background music 4</option>
                                 </select>
+                                
                             </div>
                         </div>
-                    </div>  
-                </form>
-                <form action="/ready_to_preview">
+                    </div> 
                     <div class="container text-center">
                         
-                        <input type="submit" class="btn btn-outline-light btn-lg">
-                    </div>
+                        <input type="submit" class="btn btn-outline-light btn-lg" >
+                    </div> 
+                    
                 </form>
+                
             </div>
             <h2 class="mt-5">Video preview</h2>
             <div class="container text-center">
@@ -122,9 +123,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="container text-center">
-                        <input type="submit" class="music_selection_button">
-                    </div>
+                    
                 </form>
             </div>
             <h2>Download Video</h2>
