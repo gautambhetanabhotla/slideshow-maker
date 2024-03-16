@@ -263,15 +263,24 @@ def store_durations():
         image_durations.append({'image_file': file_name, 'duration': duration_value})
     return jsonify({'message': 'Durations stored successfully.'})
 
-@app.route("/ready_to_preview",methods=['POST','GET'])
+
+
+@app.route("/ready_to_preview", methods=['POST','GET'])
 def videopreview():
+    durations = {}
+    if request.method == 'POST':
+        
+        for key, value in request.form.items():
+            if key.startswith('duration_'):
+                durations[key.split('_')[-1]] = float(value) if value else 2.0  # Default duration is 2 seconds if not specified
+        
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     path = './static/images'
     output = './static/videos'
     nameof_video = '/final.mp4'
-    audiofpath='./static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3' 
-    outputpath = output+nameof_video
+    audiofpath = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
+    outputpath = output + nameof_video
     imageslist = os.listdir(path)
 
     j = 0
@@ -280,32 +289,35 @@ def videopreview():
         imageslist[j] = i
         j += 1
 
-    clips=[]
+    clips = []
     for i in range(len(imageslist)):
-        clips.append(ImageClip(imageslist[i]).set_duration(2))
-    video_clip=concatenate_videoclips(clips,method='compose')
-    videofile=VideoFileClip(outputpath)
-    audio_bg=AudioFileClip(audiofpath)
-    final_audio=audio_bg
-    video_time=video_clip.duration
-    audio_time=audio_bg.duration
+        clip_duration = durations.get(str(i + 1), 2.0)
+        clips.append(ImageClip(imageslist[i]).set_duration(clip_duration))
+
+    video_clip = concatenate_videoclips(clips, method='compose')
+    audio_bg = AudioFileClip(audiofpath)
+    video_time = video_clip.duration
+    audio_time = audio_bg.duration
     if audio_time > video_time:
-        audio_dur=video_clip.duration
-    audio_bg.duration=audio_dur
-    
-    video_clip=video_clip.set_audio(audio_bg)
-    video_clip.write_videofile(outputpath,fps=24,remove_temp=True)
+        audio_dur = video_clip.duration
+    audio_bg.duration = audio_dur
+
+    video_clip = video_clip.set_audio(audio_bg)
+    video_clip.write_videofile(outputpath, fps=24, remove_temp=True)
+
     if os.path.exists(outputpath):
         video_html = f'''
         <div class="embed-responsive embed-responsive-16by9">
             <video width="320" height="240" controls>
-                <source src="static/videos/final.mp4" type="video/mp4">
+                <source src="{url_for('static', filename='videos/final.mp4')}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
         '''
     else:
         video_html = f'''<h1>Video will be previewed here</h1>'''
+    return render_template('video.html', video_html=video_html, image_files=image_files)
+
 
     return render_template('video.html', video_html=video_html,image_files=image_files)  
 
@@ -328,7 +340,6 @@ def profile():
 @app.route("/uploadimages", methods = ["POST"])
 def uploadimages():
     global images, username
-
     if request.method == 'POST':
         # return redirect("/decoy", 301)
         if 'file' not in request.files:
@@ -345,7 +356,6 @@ def uploadimages():
         for file in files:
             if file.filename == '':
                 continue
-            
             blob = file.read()
             img = Image.open(io.BytesIO(blob))
             metadata = {
@@ -383,7 +393,6 @@ def uploadimages():
 def logout_and_delete():
     image_folder = 'static/images'
     
-    # Delete all files in the images folder
     for filename in os.listdir(image_folder):
         file_path = os.path.join(image_folder, filename)
         try:
