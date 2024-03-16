@@ -77,8 +77,8 @@
                             </div>
                             <div>
                                 <select name="song" class="form-select p-3 wid">
-                                    <option value="1" selected>Select Song</option>
-                                    <option value="2">Background music 1</option>
+                                    <option value="{{ url_for('static', filename='music/Happy_birthday_to_you_MIDI(chosic.com).mp3') }}" selected>Select Song</option>
+                                    <option value="{{ url_for('static', filename='/music/Heat-Waves(PagalWorld).mp3') }}">Background music 1</option>
                                     <option value="3">Background music 2</option>
                                     <option value="4">Background music 3</option>
                                     <option value="5">Background music 4</option>
