@@ -13,16 +13,13 @@ import shutil
 from moviepy.editor import *
 from moviepy.video.fx.all import fadein, fadeout
 import numpy as np
-
 dbusername = json.loads(open("dbcredentials.json").read())["username"]
 dbpassword = json.loads(open("dbcredentials.json").read())["password"]
-
 def hashed(s):
 	pb = s.encode('utf-8')
 	hash_object = hashlib.sha256(pb)
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
-
 def initialise_database():
     connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
     db = connection.cursor(pymysql.cursors.DictCursor)
@@ -43,10 +40,8 @@ def initialise_database():
     connection.commit()
     db.close()
     connection.close()
-
 initialise_database()
 app = Flask(__name__)
-
 if os.path.exists("./uploads"):
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 else:
@@ -58,16 +53,12 @@ if not os.path.exists("./static/videos"):
      
 if not os.path.exists("./static/images"):
     os.mkdir("./static/images")
-
 if not os.path.exists("./static/renders"):
     os.mkdir("./static/renders")
-
 app.secret_key = "SECRET_KEY_EXISTENTIA"
-
 users = []
 images = []
 audios = []
-
 def getfromdatabase():  
 	global users, images, audios
 	connection2 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
@@ -85,19 +76,14 @@ def getfromdatabase():
 	connection2.commit()
 	db2.close()
 	connection2.close()
-
 getfromdatabase()
-
 username = ""
-
 def erasedirectory(path):
 	for file in os.listdir(path):
 		os.remove(path + "/" + file)
-
 @app.route("/")
 def rootpage():
 	return render_template("root.html")
-
 @app.route("/login")
 def login():
     global username
@@ -126,7 +112,6 @@ def login():
             return "invalid token"
     # Redirect to login page if no token is present
     return render_template("login.html")
-
 @app.route("/signup")
 def signup():
     token = request.cookies.get('jwt_token')
@@ -135,7 +120,6 @@ def signup():
         response.delete_cookie('jwt_token')
         return response
     return render_template("signup.html")
-
 @app.route("/home")
 def home():
 	if not os.path.exists("./static/renders"):
@@ -178,7 +162,6 @@ def home():
 			img = Image.open(io.BytesIO(picture['image']))
 			img.save(f"./static/renders/{username}_{picture['image_id']}.png")
 	return render_template("home.html", source_file = os.listdir("./static/renders"))
-
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
     if request.method == 'POST':
@@ -219,7 +202,6 @@ def processsignuprequest():
 			db5.close()
 			connection5.close()
 			return redirect("/login", 301)
-
 @app.route("/admin")
 def admin():
     global users, images, audios
@@ -232,7 +214,6 @@ def admin():
                 nums[index] += 1
     return render_template("admin.html", userlist = users, numimages = nums)
     # return [users, images, audios]
-
 @app.route('/move_files', methods=['POST'])
 def move_files():
     data = request.get_json()
@@ -245,35 +226,21 @@ def move_files():
         shutil.move(source_path, destination_path)
     
     return jsonify({'message': 'Files moved successfully'})
-
 @app.route("/video", methods = ['POST', 'GET'])
 def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     return render_template('video.html', image_files=image_files)
 
-image_durations = []
-
-@app.route('/store_durations', methods=['POST'])
-def store_durations():
-    global image_durations
-    for file_name in request.form.getlist('image_file'):
-        duration_key = 'duration_' + str(request.form['image_file'].index(file_name) + 1)
-        duration_value = request.form[duration_key]
-        image_durations.append({'image_file': file_name, 'duration': duration_value})
-    return jsonify({'message': 'Durations stored successfully.'})
-
-
-
 @app.route("/ready_to_preview", methods=['POST','GET'])
 def videopreview():
     durations = {}
     if request.method == 'POST':
-        
+
         for key, value in request.form.items():
             if key.startswith('duration_'):
                 durations[key.split('_')[-1]] = float(value) if value else 2.0  # Default duration is 2 seconds if not specified
-        
+
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     path = './static/images'
@@ -333,7 +300,7 @@ def profile():
     db6.close()
     connection6.close()
     return render_template("profile.html", username = username, name = Name["name"], mail = Mail["email"])
-
+  
 @app.route("/uploadimages", methods = ["POST"])
 def uploadimages():
     global images, username
@@ -369,7 +336,6 @@ def uploadimages():
                 # "layers": img.n_frames, 
                 "transparent_color": img.info.get("transparency"),    
             }
-
             metadata_json = json.dumps(metadata)
             
             connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
@@ -385,7 +351,7 @@ def uploadimages():
             db.close()
             connection.close()
         return redirect("/home", 301)
-
+      
 @app.route("/logout")
 def logout_and_delete():
     image_folder = 'static/images'
@@ -413,10 +379,8 @@ def logout_and_delete():
     username = ""
     
     return response
-
 @app.route("/decoy")
 def dekoi():
       return render_template("decoy.html")
-
 if __name__ == "__main__":
 	app.run(debug = True)
