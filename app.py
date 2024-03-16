@@ -251,17 +251,17 @@ def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     return render_template('video.html', image_files=image_files)
+
 image_durations = []
 
 @app.route('/store_durations', methods=['POST'])
 def store_durations():
+    global image_durations
     for file_name in request.form.getlist('image_file'):
         duration_key = 'duration_' + str(request.form['image_file'].index(file_name) + 1)
         duration_value = request.form[duration_key]
         image_durations.append({'image_file': file_name, 'duration': duration_value})
     return jsonify({'message': 'Durations stored successfully.'})
-
-
 
 @app.route("/ready_to_preview",methods=['POST','GET'])
 def videopreview():
@@ -297,19 +297,17 @@ def videopreview():
     video_clip.write_videofile(outputpath,fps=24,remove_temp=True)
     if os.path.exists(outputpath):
         video_html = f'''
-      <div class="embed-responsive embed-responsive-16by9">
-        <video width="320" height="240" controls>
-  <source src="static/videos/final.mp4" type="video/mp4">
-
-Your browser does not support the video tag.
-</video>
-      </div>
+        <div class="embed-responsive embed-responsive-16by9">
+            <video width="320" height="240" controls>
+                <source src="static/videos/final.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
         '''
     else:
         video_html = f'''<h1>Video will be previewed here</h1>'''
 
-    return render_template('video.html', video_html=video_html,image_files=image_files)
-    
+    return render_template('video.html', video_html=video_html,image_files=image_files)  
 
 @app.route("/profile")
 def profile():
