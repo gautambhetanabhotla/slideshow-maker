@@ -1,0 +1,35 @@
+body {
+    margin: 0px;
+    font-family: 'Poppins', sans-serif;
+}
+
+h2 {
+    font-family: 'Poppins', sans-serif;
+}
+
+h6 {
+    font-family: 'Poppins', sans-serif;
+}
+
+div {
+    padding: 5px;
+}
+
+.bg {
+    height: 100%;
+    width: auto;
+    position:fixed;
+    z-index:-1;
+    margin: 0px;
+    padding: 0px;
+}
+
+.userdiv {
+    padding: 20px;
+    background-color: white;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    border-radius: 20px;
+}

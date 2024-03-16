@@ -6,13 +6,10 @@ import pymysql.cursors
 import os
 import datetime
 import hashlib
-import cv2
 from PIL import Image, TiffImagePlugin
 import io
-import sys
 from PIL.ExifTags import TAGS
 import shutil
-import copy
 from moviepy.editor import *
 from moviepy.video.fx.all import fadein, fadeout
 import numpy as np
@@ -27,20 +24,25 @@ def hashed(s):
 	return hex_dig
 
 def initialise_database():
-	connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
-	db = connection.cursor(pymysql.cursors.DictCursor)
-	db.execute("CREATE DATABASE IF NOT EXISTS existentia")
-	connection.commit()
-	db.execute("USE existentia")
-	connection.commit()
-	db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))")
-	connection.commit()
-	db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image LONGBLOB, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))")
-	connection.commit()
-	db.execute("CREATE TABLE IF NOT EXISTS audios(username VARCHAR(255), audio_id INT, audio LONGBLOB, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))")
-	connection.commit()
-	db.close()
-	connection.close()
+    connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
+    db = connection.cursor(pymysql.cursors.DictCursor)
+    db.execute("CREATE DATABASE IF NOT EXISTS existentia")
+    connection.commit()
+    db.execute("USE existentia")
+    connection.commit()
+    db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))")
+    connection.commit()
+    db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image LONGBLOB, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))")
+    connection.commit()
+    db.execute("CREATE TABLE IF NOT EXISTS audios(username VARCHAR(255), audio_id INT, audio LONGBLOB, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))")
+    connection.commit()
+    db.execute("SELECT * FROM users WHERE username = 'admin'")
+    x = db.fetchall()
+    if len(x) == 0:
+        db.execute("INSERT INTO users VALUES('Administrator', 'admin', %s, 'administrator@existentia.com')", (hashed("admin")))
+    connection.commit()
+    db.close()
+    connection.close()
 
 initialise_database()
 app = Flask(__name__)
@@ -50,6 +52,15 @@ if os.path.exists("./uploads"):
 else:
 	os.mkdir("./uploads")
 	app.config['UPLOAD_FOLDER'] = "./uploads"
+ 
+if not os.path.exists("./static/videos"):
+	os.mkdir("./static/videos")
+     
+if not os.path.exists("./static/images"):
+    os.mkdir("./static/images")
+
+if not os.path.exists("./static/renders"):
+    os.mkdir("./static/renders")
 
 app.secret_key = "SECRET_KEY_EXISTENTIA"
 
@@ -211,8 +222,16 @@ def processsignuprequest():
 
 @app.route("/admin")
 def admin():
-	global users, images, audios
-	return [users, images, audios]
+    global users, images, audios
+    nums = []
+    for i in range(len(users)):
+        nums.append(0)
+    for index, user in enumerate(users):
+        for image in images:
+            if image["username"] == user["username"]:
+                nums[index] += 1
+    return render_template("admin.html", userlist = users, numimages = nums)
+    # return [users, images, audios]
 
 @app.route('/move_files', methods=['POST'])
 def move_files():
@@ -299,10 +318,10 @@ def profile():
     db6.execute("USE existentia")
     connection6.commit()
     db6.execute("SELECT name FROM users WHERE username=%s",(username))
-    Name=db6.fetchone()
+    Name = db6.fetchone()
     connection6.commit()
     db6.execute("SELECT email FROM users WHERE username=%s",(username))
-    Mail=db6.fetchone()
+    Mail = db6.fetchone()
     connection6.commit()
     db6.close()
     connection6.close()
@@ -313,11 +332,13 @@ def uploadimages():
     global images, username
 
     if request.method == 'POST':
+        # return redirect("/decoy", 301)
         if 'file' not in request.files:
             flash('No file part')
             return redirect("/home", 301)
         
         files = request.files.getlist("file")
+        # return str(len(files))
         
         if len(files) == 0:
             flash('No selected file')
@@ -325,8 +346,7 @@ def uploadimages():
         
         for file in files:
             if file.filename == '':
-                flash('No selected file')
-                return redirect("/home", 301)
+                continue
             
             blob = file.read()
             img = Image.open(io.BytesIO(blob))
@@ -341,7 +361,7 @@ def uploadimages():
                 "icc_profile": img.info.get("icc_profile"), 
                 "transparency": img.info.get("transparency"), 
                 "color_palette": img.palette, 
-                "layers": img.n_frames, 
+                # "layers": img.n_frames, 
                 "transparent_color": img.info.get("transparency"),    
             }
 
@@ -389,6 +409,10 @@ def logout_and_delete():
     username = ""
     
     return response
+
+@app.route("/decoy")
+def dekoi():
+      return render_template("decoy.html")
 
 if __name__ == "__main__":
 	app.run(debug = True)
