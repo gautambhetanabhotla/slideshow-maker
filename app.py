@@ -14,7 +14,8 @@ from PIL.ExifTags import TAGS
 import shutil
 import copy
 from moviepy.editor import *
-
+from moviepy.video.fx.all import fadein, fadeout
+import numpy as np
 
 dbusername = json.loads(open("dbcredentials.json").read())["username"]
 dbpassword = json.loads(open("dbcredentials.json").read())["password"]
@@ -289,8 +290,6 @@ Your browser does not support the video tag.
         video_html = f'''<h1>Video will be previewed here</h1>'''
 
     return render_template('video.html', video_html=video_html,image_files=image_files)
-
-  
     
 
 @app.route("/profile")
