@@ -96,11 +96,11 @@ def login():
             username = decoded_token['username']
             # Verify the user's credentials
             if username == 'admin':
-                return redirect("/admin")
+                return redirect("/admin", 301)
             else:
                 for user in users:
                     if user["username"] == username:
-                        return redirect("/home")	
+                        return redirect("/home", 301)	
                 else:
                     username = ""
                     return render_template("login.html")
@@ -283,10 +283,8 @@ def videopreview():
         '''
     else:
         video_html = f'''<h1>Video will be previewed here</h1>'''
-    return render_template('video.html', video_html=video_html, image_files=image_files)
+    return render_template('video.html', video_html=video_html, image_files=image_files) 
 
-
-    return render_template('video.html', video_html=video_html,image_files=image_files)
 @app.route("/profile")
 def profile():
     connection6 = pymysql.connect(host='localhost', user = dbusername, password = dbpassword)
@@ -302,6 +300,7 @@ def profile():
     db6.close()
     connection6.close()
     return render_template("profile.html", username = username, name = Name["name"], mail = Mail["email"])
+  
 @app.route("/uploadimages", methods = ["POST"])
 def uploadimages():
     global images, username
@@ -352,6 +351,7 @@ def uploadimages():
             db.close()
             connection.close()
         return redirect("/home", 301)
+      
 @app.route("/logout")
 def logout_and_delete():
     image_folder = 'static/images'
@@ -367,7 +367,7 @@ def logout_and_delete():
             print(f"Failed to delete {file_path}. Reason: {e}")
     
     # Delete the JWT token cookie
-    response = redirect("/")
+    response = redirect("/", 301)
     response.delete_cookie('jwt_token')
     
     # Delete all files in the renders folder
