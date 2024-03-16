@@ -1,0 +1,42 @@
+body {
+    margin: 0px;
+    font-family: 'Poppins', sans-serif;
+}
+
+h2 {
+    font-family: 'Poppins', sans-serif;
+}
+
+h6 {
+    font-family: 'Poppins', sans-serif;
+}
+
+div {
+    padding: 5px;
+}
+
+.bg {
+    height: 100%;
+    width: auto;
+    position:fixed;
+    z-index:-1;
+    margin: 0px;
+    padding: 0px;
+}
+
+.userdiv {
+    padding: 20px;
+    background-color: white;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 40vw;
+    border-radius: 20px;
+}
+
+#dumb {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+}
