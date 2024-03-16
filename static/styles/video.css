@@ -1,0 +1,33 @@
+.bg {
+    position: fixed;
+    z-index: -1;
+}
+
+body {
+    color: white;
+    font-family: 'Poppins', sans-serif;
+}
+
+h3 {
+    color: white;
+}
+
+h1 {
+    color: white;
+}
+
+.gal {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+input {
+    font-family: 'Poppins', sans-serif;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.photo {
+    margin: 20px;
+}

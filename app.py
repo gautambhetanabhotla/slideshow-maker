@@ -6,14 +6,11 @@ import pymysql.cursors
 import os
 import datetime
 import hashlib
-import cv2
 from PIL import Image, TiffImagePlugin
 import io
 from PIL.ExifTags import TAGS
 import shutil
-import copy
 from moviepy.editor import *
-
 
 dbusername = json.loads(open("dbcredentials.json").read())["username"]
 dbpassword = json.loads(open("dbcredentials.json").read())["password"]
@@ -56,6 +53,12 @@ else:
  
 if not os.path.exists("./static/videos"):
 	os.mkdir("./static/videos")
+     
+if not os.path.exists("./static/images"):
+    os.mkdir("./static/images")
+
+if not os.path.exists("./static/renders"):
+    os.mkdir("./static/renders")
 
 app.secret_key = "SECRET_KEY_EXISTENTIA"
 

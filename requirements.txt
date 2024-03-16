@@ -2,3 +2,4 @@ flask
 jwt
 pymysql
 datetime
+moviepy

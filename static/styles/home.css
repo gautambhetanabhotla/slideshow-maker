@@ -7,20 +7,6 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-.image-selection {
-  width: 58%;
-  margin-left: 24%;
-  background-color: beige;
-  text-align: center;
-}
-
-.grid-container-preview {
-  display: grid;
-  grid-template-columns: 33% 33% 33%;
-  background-color:beige;
-  padding: 10px;
-}
-
 #gallery img {
   object-fit: contain;
   max-width: 100%;
