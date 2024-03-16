@@ -3,6 +3,10 @@
   z-index: -1;
 }
 
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
 .image-selection {
   width: 58%;
   margin-left: 24%;
@@ -49,4 +53,12 @@ p {
     backdrop-filter: blur(100px);
     text-shadow: 0 0 20px #fff, 0 0 30px #26b8e4, 0 0 40px #1526d7, 0 0 50px #01187b, 0 0 60px #dcdfe6, 0 0 70px #ffffff, 0 0 80px #fbf9fa;
   }
+}
+
+button {
+  backdrop-filter: blur(100px);
+}
+
+input {
+  backdrop-filter: blur(100px);
 }

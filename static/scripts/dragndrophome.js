@@ -19,7 +19,7 @@ let fd = new FormData(formElem);
 
 formElem.onsubmit = async(e) => {
     e.preventDefault();
-
+    
     let response = await fetch('/uploadimages', {
       method: 'POST',
       body: fd
