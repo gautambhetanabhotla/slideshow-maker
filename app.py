@@ -252,23 +252,10 @@ def video():
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     return render_template('video.html', image_files=image_files)
 
-image_durations = []
-
-@app.route('/store_durations', methods=['POST'])
-def store_durations():
-    global image_durations
-    print(request.form.getlist('image_file'))
-    for file_name in request.form.getlist('image_file'):
-        duration_key = 'duration_' + str(request.form['image_file'].index(file_name) + 1)
-        duration_value = request.form[duration_key]
-        image_durations.append({'image_file': file_name, 'duration': duration_value})
-    return jsonify({'message': 'Durations stored successfully.'})
-
 
 
 @app.route("/ready_to_preview", methods=['POST', 'GET'])
 def videopreview():
-    print(image_durations)
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     path = './static/images'
@@ -278,7 +265,6 @@ def videopreview():
     outputpath = output+nameof_video
     imageslist = os.listdir(path)
 
-    # Handle potential empty image list
     if not imageslist:
         return render_template('video.html', video_html="<h1>No images found!</h1>")
 
@@ -291,7 +277,7 @@ def videopreview():
     image_arrays_resized = []
     for image_path in image_files:
         try:
-            img = Image.open(os.path.join(path, image_path))  # Open image using full path
+            img = Image.open(os.path.join(path, image_path))  
             resized_img = img.resize((640, 480))
             if resized_img.mode == 'RGBA':
                 resized_img = resized_img.convert('RGB')
@@ -300,8 +286,8 @@ def videopreview():
             print(f"Error loading image: {image_path} ")
             
             
-    duration_per_frame = 3  # Set the duration of each frame in seconds
-    transition_duration = 0.5  # Adjust transition duration as needed
+    duration_per_frame = 3  
+    transition_duration = 0.5  
     
     
     clips_with_transitions = []
