@@ -53,6 +53,9 @@ if os.path.exists("./uploads"):
 else:
 	os.mkdir("./uploads")
 	app.config['UPLOAD_FOLDER'] = "./uploads"
+ 
+if not os.path.exists("./static/videos"):
+	os.mkdir("./static/videos")
 
 app.secret_key = "SECRET_KEY_EXISTENTIA"
 
