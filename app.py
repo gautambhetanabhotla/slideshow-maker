@@ -276,13 +276,16 @@ def videopreview():
     for i in range(len(imageslist)):
         clips.append(ImageClip(imageslist[i]).set_duration(2))
     video_clip=concatenate_videoclips(clips,method='compose')
-
     videofile=VideoFileClip(outputpath)
     audio_bg=AudioFileClip(audiofpath)
     final_audio=audio_bg
-
-
-    video_clip=video_clip.set_audio(final_audio)
+    video_time=video_clip.duration
+    audio_time=audio_bg.duration
+    if audio_time > video_time:
+        audio_dur=video_clip.duration
+    audio_bg.duration=audio_dur
+    
+    video_clip=video_clip.set_audio(audio_bg)
     video_clip.write_videofile(outputpath,fps=24,remove_temp=True)
     if os.path.exists(outputpath):
         video_html = f'''
