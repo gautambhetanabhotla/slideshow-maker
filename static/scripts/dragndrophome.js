@@ -26,12 +26,14 @@ formElem.onsubmit = async(e) => {
     });
 
     console.log(response);
-
-    let result = await response.text();
-    alert(result.message);
   };
 
 dropArea.addEventListener('drop', handleDrop, false);
+// fileElem.addEventListener('change', handleChange, false);
+
+function handleChange(e) {
+    handleFiles(this.files);
+}
 
 function preventDefaults(e) {
     e.preventDefault();
@@ -58,6 +60,8 @@ dropArea.addEventListener('click', () => {
 });
 
 fileElem.addEventListener('change', function (e) {
+    console.log("changed ra");
+    console.log(this.files);
     handleFiles(this.files);
 });
 
@@ -82,9 +86,7 @@ function addToForm(file) {
 }
 
 function DisplayData() {
-    for(let [key, value] of fd) {
-        console.log(`${key} = ${value}`);
-    }
+    console.log(fd.getAll('file'));
 }
 
 setInterval(DisplayData, 1000);

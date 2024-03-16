@@ -258,11 +258,14 @@ def uploadimages():
     global images, username
 
     if request.method == 'POST':
+        consolelog("HELLO MOTO")
+        # return redirect("/decoy", 301)
         if 'file' not in request.files:
             flash('No file part')
             return redirect("/home", 301)
         
         files = request.files.getlist("file")
+        # return str(len(files))
         
         if len(files) == 0:
             flash('No selected file')
@@ -270,7 +273,7 @@ def uploadimages():
         
         for file in files:
             if file.filename == '':
-                return redirect("/home", 301)
+                continue
             
             blob = file.read()
             img = Image.open(io.BytesIO(blob))
@@ -332,6 +335,10 @@ def logout_and_delete():
     username = ""
     
     return response
+
+@app.route("/decoy")
+def dekoi():
+      return render_template("decoy.html")
 
 if __name__ == "__main__":
 	app.run(debug = True)
