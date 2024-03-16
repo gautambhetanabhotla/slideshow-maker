@@ -110,11 +110,11 @@ def login():
             username = decoded_token['username']
             # Verify the user's credentials
             if username == 'admin':
-                return redirect("/admin")
+                return redirect("/admin", 301)
             else:
                 for user in users:
                     if user["username"] == username:
-                        return redirect("/home")	
+                        return redirect("/home", 301)	
                 else:
                     username = ""
                     return render_template("login.html")
@@ -316,10 +316,7 @@ def videopreview():
         '''
     else:
         video_html = f'''<h1>Video will be previewed here</h1>'''
-    return render_template('video.html', video_html=video_html, image_files=image_files)
-
-
-    return render_template('video.html', video_html=video_html,image_files=image_files)  
+    return render_template('video.html', video_html=video_html, image_files=image_files) 
 
 @app.route("/profile")
 def profile():
@@ -404,7 +401,7 @@ def logout_and_delete():
             print(f"Failed to delete {file_path}. Reason: {e}")
     
     # Delete the JWT token cookie
-    response = redirect("/")
+    response = redirect("/", 301)
     response.delete_cookie('jwt_token')
     
     # Delete all files in the renders folder
