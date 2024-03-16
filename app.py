@@ -236,11 +236,9 @@ def video():
 def videopreview():
     durations = {}
     if request.method == 'POST':
-
         for key, value in request.form.items():
             if key.startswith('duration_'):
                 durations[key.split('_')[-1]] = float(value) if value else 2.0  # Default duration is 2 seconds if not specified
-
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     path = './static/images'
@@ -249,6 +247,8 @@ def videopreview():
     audiofpath = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
     outputpath = output + nameof_video
     imageslist = os.listdir(path)
+    if not imageslist:
+        return render_template('video.html', video_html="<h1>No images found!</h1>")
 
     j = 0
     for i in imageslist:
@@ -256,21 +256,26 @@ def videopreview():
         imageslist[j] = i
         j += 1
 
-    clips = []
-    for i in range(len(imageslist)):
-        clip_duration = durations.get(str(i + 1), 2.0)
-        clips.append(ImageClip(imageslist[i]).set_duration(clip_duration))
-
-    video_clip = concatenate_videoclips(clips, method='compose')
-    audio_bg = AudioFileClip(audiofpath)
-    video_time = video_clip.duration
-    audio_time = audio_bg.duration
-    if audio_time > video_time:
-        audio_dur = video_clip.duration
-    audio_bg.duration = audio_dur
-
-    video_clip = video_clip.set_audio(audio_bg)
-    video_clip.write_videofile(outputpath, fps=24, remove_temp=True)
+    image_arrays_resized = []
+    for image_path in image_files:
+        try:
+            img = Image.open(os.path.join(path, image_path))  
+            resized_img = img.resize((640, 480))
+            if resized_img.mode == 'RGBA':
+                resized_img = resized_img.convert('RGB')
+            image_arrays_resized.append(np.array(resized_img))
+        except (FileNotFoundError, IOError) as e:
+            print(f"Error loading image: {image_path} ")       
+    duration_per_frame = 3  
+    transition_duration = 0.5  
+    clips_with_transitions = []
+    for i in range(len(image_arrays_resized)):
+        clip = ImageClip(image_arrays_resized[i], duration=duration_per_frame)
+        if i > 0:
+            clip = fadein(clip, duration=transition_duration)
+        if i < len(image_arrays_resized) - 1:
+            clip = fadeout(clip, duration=transition_duration)
+        clips_with_transitions.append(clip)
 
     if os.path.exists(outputpath):
         video_html = f'''
