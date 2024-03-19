@@ -234,8 +234,17 @@ def video():
 
 @app.route("/ready_to_preview", methods=['POST','GET'])
 def videopreview():
+    
     durations = {}
     if request.method == 'POST':
+        selected_song = request.form.get('song')
+       
+        if selected_song:
+         
+            audiofpath = selected_song.strip()
+        elif selected_song =="0":
+            
+            audiofpath = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
 
         for key, value in request.form.items():
             if key.startswith('duration_'):
@@ -246,20 +255,21 @@ def videopreview():
     path = './static/images'
     output = './static/videos'
     nameof_video = '/final.mp4'
-    audiofpath = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
+   
     outputpath = output + nameof_video
     imageslist = os.listdir(path)
 
-    j = 0
-    for i in imageslist:
-        i = path + '/' + i
-        imageslist[j] = i
-        j += 1
+    imageslist = [os.path.join(path, filename) for filename in imageslist]
+    print(imageslist)
+
 
     clips = []
     for i in range(len(imageslist)):
         clip_duration = durations.get(str(i + 1), 2.0)
+        # image = ImageClip(imageslist[i], duration=clip_duration)
+        # clips.append(image)
         clips.append(ImageClip(imageslist[i]).set_duration(clip_duration))
+
 
     video_clip = concatenate_videoclips(clips, method='compose')
     audio_bg = AudioFileClip(audiofpath)
@@ -286,21 +296,9 @@ def videopreview():
     return render_template('video.html', video_html=video_html, image_files=image_files)
 
 
-    return render_template('video.html', video_html=video_html,image_files=image_files)
 
 
 @app.route("/profile")
-
-    
-          
-            
-    
-
-          
-          Expand Down
-    
-    
-  
 def profile():
     connection6 = pymysql.connect(host='localhost', user = dbusername, password = dbpassword)
     db6 = connection6.cursor(pymysql.cursors.DictCursor)

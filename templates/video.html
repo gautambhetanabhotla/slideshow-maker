@@ -33,66 +33,66 @@
                             {% endfor %}
                         </div>
                         <br>
-                        <button type="submit" class="btn btn-outline-light btn-lg">Set durations</button>
+                        <div class="container text-center text-dark" style="padding: 2vw;">
+                            <h2>Select an audio file</h2>
+                        </div>
+                        <div>
+                            <div class="container text-center">
+                                <h3>Background music 1</h3>
+                                <audio controls loop>
+                                    <source src="{{ url_for('static', filename='music/Happy_birthday_to_you_MIDI(chosic.com).mp3') }}">
+                                </audio>
+                                <br>
+                                <h3>Background music 2</h3>
+                                <audio controls loop>
+                                    <source src="{{ url_for('static', filename='/music/Heat-Waves(PagalWorld).mp3') }}">
+                                </audio>
+                                <br>
+                                <h3>Background music 3</h3>
+                                <audio controls loop>
+                                    <source
+                                        src="{{ url_for('static', filename='music/Zara-Zara-Behekta-Hai-(Female-Version)(PagalWorldl).mp3') }}">
+                                </audio>
+                                <br>
+                                <h3>Background music 4</h3>
+                                <audio controls loop>
+                                    <source
+                                        src="{{ url_for('static', filename='music/OneRepublic---I-Aint-Worried-(From-Top-Gun_-Maverick)(pagalworld.co.uk).mp3') }}">
+                                </audio>
+                                <br>
+                            </div>
+                        </div>
+                        <div>
+                           
+                                <div class="container text-center">
+                                    <div class="d-flex flex-row justify-content-center p-4">
+                                        <div>
+                                            <label for="song" class="mt-3">
+                                                <h4>Choose an audio file :</h4>
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <select name="song" class="form-select p-3 wid">
+                                                <option value="0"selected>Select Song</option>
+                                                <option value=" ./static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3">Background music 1</option>
+                                                <option value="./static/music/Heat-Waves(PagalWorld).mp3"></option>>Background music 2</option>
+                                                <option value="./static/music/Zara-Zara-Behekta-Hai-(Female-Version)(PagalWorldl).mp3">Background music 3</option>
+                                                <option value="./static/music/OneRepublic---I-Aint-Worried-(From-Top-Gun_-Maverick)(pagalworld.co.uk).mp3">Background music 4</option>
+                                            </select>
+                                            
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="container text-center">
+                                    
+                                    <input type="submit" class="btn btn-outline-light btn-lg" >
+                                </div> 
+                                
+                            
                     </form>
                 </div>
             </div>
-            <div class="container text-center text-dark" style="padding: 2vw;">
-                <h2>Select an audio file</h2>
-            </div>
-            <div>
-                <div class="container text-center">
-                    <h3>Background music 1</h3>
-                    <audio controls loop>
-                        <source src="{{ url_for('static', filename='music/Happy_birthday_to_you_MIDI(chosic.com).mp3') }}">
-                    </audio>
-                    <br>
-                    <h3>Background music 2</h3>
-                    <audio controls loop>
-                        <source src="{{ url_for('static', filename='/music/Heat-Waves(PagalWorld).mp3') }}">
-                    </audio>
-                    <br>
-                    <h3>Background music 3</h3>
-                    <audio controls loop>
-                        <source
-                            src="{{ url_for('static', filename='music/Zara-Zara-Behekta-Hai-(Female-Version)(PagalWorldl).mp3') }}">
-                    </audio>
-                    <br>
-                    <h3>Background music 4</h3>
-                    <audio controls loop>
-                        <source
-                            src="{{ url_for('static', filename='music/OneRepublic---I-Aint-Worried-(From-Top-Gun_-Maverick)(pagalworld.co.uk).mp3') }}">
-                    </audio>
-                    <br>
-                </div>
-            </div>
-            <div>
-                <form action="/ready_to_preview" method="POST">
-                    <div class="container text-center">
-                        <div class="d-flex flex-row justify-content-center p-4">
-                            <div>
-                                <label for="song" class="mt-3">
-                                    <h4>Choose an audio file :</h4>
-                                </label>
-                            </div>
-                            <div>
-                                <select name="song" class="form-select p-3 wid">
-                                    <option value="{{ url_for('static', filename='music/Happy_birthday_to_you_MIDI(chosic.com).mp3') }}" selected>Select Song</option>
-                                    <option value="{{ url_for('static', filename='/music/Heat-Waves(PagalWorld).mp3') }}">Background music 1</option>
-                                    <option value="3">Background music 2</option>
-                                    <option value="4">Background music 3</option>
-                                    <option value="5">Background music 4</option>
-                                </select>
-                                
-                            </div>
-                        </div>
-                    </div> 
-                    <div class="container text-center">
-                        
-                        <input type="submit" class="btn btn-outline-light btn-lg" >
-                    </div> 
-                    
-                </form>
+ 
                 
             </div>
             <h2 class="mt-5">Video preview</h2>
