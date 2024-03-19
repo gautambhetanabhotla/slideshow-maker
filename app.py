@@ -148,7 +148,7 @@ def home():
 		for file in os.listdir("./static/renders"):
 			if file.startswith(username):
 				if(len(userimages) == numfiles):
-					return render_template("home.html", source_file = os.listdir("./static/renders"),username=username)
+					return render_template("home.html", source_file = os.listdir("./static/renders"),username=username,num_images=len(os.listdir("./static/renders")))
 				else:
 					erasedirectory("./static/renders")
 					return redirect("/home", 301)				
@@ -168,13 +168,14 @@ def home():
 		for picture in pictures:
 			img = Image.open(io.BytesIO(picture['image']))
 			img.save(f"./static/renders/{username}_{picture['image_id']}.png")
-	return render_template("home.html", source_file = os.listdir("./static/renders"))
+	return render_template("home.html", source_file = os.listdir("./static/renders"),num_images=len(os.listdir("./static/renders")))
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
     if request.method == 'POST':
         global username
         username = request.form["username"]
+        print(username)
         password = request.form["password"]
         for user in users:
             if user["username"] == username and user["password"] == hashed(password):
@@ -262,9 +263,7 @@ def videopreview():
             if key.startswith('duration_'):
                 durations[key.split('_')[-1]] = float(value) if value else 2.0  # Default duration is 2 seconds if not specified
                 img_durations.append(durations[key.split('_')[-1]])
-    print("\n\n\n\n")
-    print(selected_transition)
-    print("\n\n\n\n")
+
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     path = './static/images'
@@ -285,7 +284,7 @@ def videopreview():
     image_arrays_resized = []
     for image_path in image_files:
         try:
-            img = Image.open(os.path.join(path, image_path))  # Open image using full path
+            img = Image.open(os.path.join(path, image_path))
             resized_img = img.resize((640, 480))
             if resized_img.mode == 'RGBA':
                 resized_img = resized_img.convert('RGB')
@@ -293,7 +292,6 @@ def videopreview():
         except (FileNotFoundError, IOError) as e:
             print(f"Error loading image: {image_path} ")
 
-    duration_per_frame = 3
     transition_duration = 0.3
 
     clips_with_transitions = []
@@ -353,12 +351,11 @@ def videopreview():
         audio_dur=video_dur
     audio_bg.duration=audio_dur
     final_clip=final_clip.set_audio(audio_bg)
-    videofile = VideoFileClip(outputpath)
     final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
     if os.path.exists(outputpath):
         video_html = f'''
-        <div class="embed-responsive embed-responsive-16by9">
-            <video width="320" height="240" id="previewVideo" controls>
+        <div>
+            <video width="500" height="360" id="previewVideo" controls>
                 <source src="static/videos/final.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
