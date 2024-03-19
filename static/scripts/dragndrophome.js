@@ -25,7 +25,8 @@ formElem.onsubmit = async(e) => {
       body: fd
     });
 
-    console.log(response);
+    location.reload();
+    console.log(response.text());
   };
 
 dropArea.addEventListener('drop', handleDrop, false);

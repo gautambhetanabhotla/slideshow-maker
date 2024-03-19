@@ -41,6 +41,7 @@ def initialise_database():
     db.close()
     connection.close()
 initialise_database()
+
 app = Flask(__name__)
 if os.path.exists("./uploads"):
 	app.config['UPLOAD_FOLDER'] = "./uploads"
@@ -81,6 +82,7 @@ username = ""
 def erasedirectory(path):
 	for file in os.listdir(path):
 		os.remove(path + "/" + file)
+
 @app.route("/")
 def rootpage():
 	return render_template("root.html")
@@ -137,8 +139,6 @@ def home():
 	numfiles = len(os.listdir("./static/renders"))	
 	if numfiles != 0 :
 		for file in os.listdir("./static/renders"):
-			if username == "":
-				return "null username"
 			if file.startswith(username):
 				if(len(userimages) == numfiles):
 					return render_template("home.html", source_file = os.listdir("./static/renders"),username=username)
@@ -226,61 +226,131 @@ def move_files():
         shutil.move(source_path, destination_path)
     
     return jsonify({'message': 'Files moved successfully'})
+
 @app.route("/video", methods = ['POST', 'GET'])
 def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     return render_template('video.html', image_files=image_files)
 
-@app.route("/ready_to_preview", methods=['POST','GET'])
+
+img_durations = []
+
+@app.route("/ready_to_preview", methods=['POST', 'GET'])
 def videopreview():
-    
     durations = {}
+    global img_durations
+    img_durations.clear()
     if request.method == 'POST':
         selected_song = request.form.get('song')
-       
+        selected_transition=request.form.get('transition')
         if selected_song:
-         
             audiofpath = selected_song.strip()
         elif selected_song =="0":
-            
             audiofpath = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
-
+        if selected_transition:
+            selected_transition.strip()
         for key, value in request.form.items():
             if key.startswith('duration_'):
                 durations[key.split('_')[-1]] = float(value) if value else 2.0  # Default duration is 2 seconds if not specified
+                img_durations.append(durations[key.split('_')[-1]])
+  
 
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     path = './static/images'
     output = './static/videos'
     nameof_video = '/final.mp4'
+
    
     outputpath = output + nameof_video
     imageslist = os.listdir(path)
-
-    imageslist = [os.path.join(path, filename) for filename in imageslist]
-    print(imageslist)
-
-
-    clips = []
-    for i in range(len(imageslist)):
-        clip_duration = durations.get(str(i + 1), 2.0)
-        # image = ImageClip(imageslist[i], duration=clip_duration)
-        # clips.append(image)
-        clips.append(ImageClip(imageslist[i]).set_duration(clip_duration))
+    if not imageslist:
+        return render_template('video.html', video_html="<h1>No images found!</h1>")
+    j = 0
+    for i in imageslist:
+        i = path + '/' + i
+        imageslist[j] = i
+        j += 1
+     
+      
 
 
-    video_clip = concatenate_videoclips(clips, method='compose')
+
+
+    image_arrays_resized = []
+    for image_path in image_files:
+        try:
+            img = Image.open(os.path.join(path, image_path))  # Open image using full path
+            resized_img = img.resize((640, 480))
+            if resized_img.mode == 'RGBA':
+                resized_img = resized_img.convert('RGB')
+            image_arrays_resized.append(np.array(resized_img))
+        except (FileNotFoundError, IOError) as e:
+            print(f"Error loading image: {image_path} ")
+
+    duration_per_frame = 3
+    transition_duration = 0.3
+
+    clips_with_transitions = []
+
+    if not img_durations:
+        return f"Error: No image durations specified."
+
+
+    if selected_transition=="crossfade": 
+        print("\n\n\n","hello","\n\n\n\n")
+        for i in range(len(image_arrays_resized)):
+            clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+            if i > 0:
+                clip = fadein(clip, duration=transition_duration)
+            if i < len(image_arrays_resized) - 1:
+                clip = fadeout(clip, duration=transition_duration)
+            clips_with_transitions.append(clip)
+    elif selected_transition=="fade_in":
+        for i in range(len(image_arrays_resized)):
+            clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+            if i > 0:
+                clip = fadein(clip, duration=transition_duration)
+            clips_with_transitions.append(clip)
+    elif selected_transition=="fade_out":
+        for i in range(len(image_arrays_resized)):
+            clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+            if i < len(image_arrays_resized) - 1:
+                clip = fadeout(clip, duration=transition_duration)
+    elif selected_transition == "slidein":
+        clips_with_transitions = []
+        if len(image_arrays_resized) > 1:
+
+            for i in range(0, len(image_arrays_resized)):
+                clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+                clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_in, duration=transition_duration, side="left").fx(transfx.crossfadeout, duration=transition_duration)]))
+        else:
+            clip=ImageClip(image_arrays_resized[0],duration=img_durations[0])
+            clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_in,duration=transition_duration, side="left")]))
+    elif selected_transition == "slideout":
+        clips_with_transitions = []
+        if len(image_arrays_resized) > 1:
+
+            for i in range(0, len(image_arrays_resized)):
+                clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+                clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_out, duration=transition_duration, side="left").fx(transfx.crossfadein, duration=transition_duration)]))
+        else:
+            clip=ImageClip(image_arrays_resized[0],duration=img_durations[0])
+            clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_out,duration=transition_duration, side="left")]))
+        
+                
+        
+    final_clip = concatenate_videoclips(clips_with_transitions,method="compose")
     audio_bg = AudioFileClip(audiofpath)
-    video_time = video_clip.duration
-    audio_time = audio_bg.duration
-    if audio_time > video_time:
-        audio_dur = video_clip.duration
-    audio_bg.duration = audio_dur
-
-    video_clip = video_clip.set_audio(audio_bg)
-    video_clip.write_videofile(outputpath, fps=24, remove_temp=True)
+    video_dur=final_clip.duration
+    audio_dur=audio_bg.duration
+    if(audio_dur>video_dur):
+        audio_dur=video_dur
+    audio_bg.duration=audio_dur
+    final_clip=final_clip.set_audio(audio_bg)
+    videofile = VideoFileClip(outputpath)
+    final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
 
     if os.path.exists(outputpath):
         video_html = f'''
@@ -294,7 +364,6 @@ def videopreview():
     else:
         video_html = f'''<h1>Video will be previewed here</h1>'''
     return render_template('video.html', video_html=video_html, image_files=image_files)
-
 
 
 
@@ -363,6 +432,7 @@ def uploadimages():
             db.close()
             connection.close()
         return redirect("/home", 301)
+
 @app.route("/logout")
 def logout_and_delete():
     image_folder = 'static/images'
@@ -390,8 +460,13 @@ def logout_and_delete():
     username = ""
     
     return response
+
+
+
 @app.route("/decoy")
 def dekoi():
       return render_template("decoy.html")
-if __name__ == "__main__":
+  
+if __name__ == "_main_":
+
 	app.run(debug = True)
