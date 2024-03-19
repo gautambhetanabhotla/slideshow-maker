@@ -244,6 +244,7 @@ def videopreview():
     if request.method == 'POST':
         selected_song = request.form.get('song')
         selected_transition=request.form.get('transition')
+        selected_resolution = request.form.get('resolution') 
         if selected_song:
             audiofpath = selected_song.strip()
         elif selected_song =="0":
@@ -282,7 +283,17 @@ def videopreview():
     for image_path in image_files:
         try:
             img = Image.open(os.path.join(path, image_path))  # Open image using full path
-            resized_img = img.resize((640, 480))
+            img2=img
+            
+            if selected_resolution == '1':
+                resized_img = img2.resize((426,240))
+            elif selected_resolution == '2':
+                resized_img = img2.resize((854,480))
+            elif selected_resolution == '3':
+                resized_img = img2.resize((1280,720))
+            elif selected_resolution == '4':
+                resized_img = img2.resize((1920,1080))
+            
             if resized_img.mode == 'RGBA':
                 resized_img = resized_img.convert('RGB')
             image_arrays_resized.append(np.array(resized_img))
@@ -349,7 +360,7 @@ def videopreview():
         audio_dur=video_dur
     audio_bg.duration=audio_dur
     final_clip=final_clip.set_audio(audio_bg)
-    videofile = VideoFileClip(outputpath)
+    
     final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
 
     if os.path.exists(outputpath):
