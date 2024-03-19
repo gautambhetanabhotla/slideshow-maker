@@ -15,11 +15,13 @@ from moviepy.video.fx.all import fadein, fadeout
 import numpy as np
 dbusername = json.loads(open("dbcredentials.json").read())["username"]
 dbpassword = json.loads(open("dbcredentials.json").read())["password"]
+
 def hashed(s):
 	pb = s.encode('utf-8')
 	hash_object = hashlib.sha256(pb)
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
+
 def initialise_database():
     connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
     db = connection.cursor(pymysql.cursors.DictCursor)
@@ -40,7 +42,9 @@ def initialise_database():
     connection.commit()
     db.close()
     connection.close()
+
 initialise_database()
+
 app = Flask(__name__)
 if os.path.exists("./uploads"):
 	app.config['UPLOAD_FOLDER'] = "./uploads"
@@ -78,12 +82,15 @@ def getfromdatabase():
 	connection2.close()
 getfromdatabase()
 username = ""
+
 def erasedirectory(path):
 	for file in os.listdir(path):
 		os.remove(path + "/" + file)
+  
 @app.route("/")
 def rootpage():
 	return render_template("root.html")
+
 @app.route("/login")
 def login():
     global username
@@ -96,11 +103,11 @@ def login():
             username = decoded_token['username']
             # Verify the user's credentials
             if username == 'admin':
-                return redirect("/admin", 301)
+                return redirect("/admin")
             else:
                 for user in users:
                     if user["username"] == username:
-                        return redirect("/home", 301)	
+                        return redirect("/home")	
                 else:
                     username = ""
                     return render_template("login.html")
@@ -112,6 +119,7 @@ def login():
             return "invalid token"
     # Redirect to login page if no token is present
     return render_template("login.html")
+
 @app.route("/signup")
 def signup():
     token = request.cookies.get('jwt_token')
@@ -120,6 +128,7 @@ def signup():
         response.delete_cookie('jwt_token')
         return response
     return render_template("signup.html")
+
 @app.route("/home")
 def home():
 	if not os.path.exists("./static/renders"):
@@ -137,8 +146,6 @@ def home():
 	numfiles = len(os.listdir("./static/renders"))	
 	if numfiles != 0 :
 		for file in os.listdir("./static/renders"):
-			if username == "":
-				return "null username"
 			if file.startswith(username):
 				if(len(userimages) == numfiles):
 					return render_template("home.html", source_file = os.listdir("./static/renders"),username=username)
@@ -162,6 +169,7 @@ def home():
 			img = Image.open(io.BytesIO(picture['image']))
 			img.save(f"./static/renders/{username}_{picture['image_id']}.png")
 	return render_template("home.html", source_file = os.listdir("./static/renders"))
+
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
     if request.method == 'POST':
@@ -226,27 +234,45 @@ def move_files():
         shutil.move(source_path, destination_path)
     
     return jsonify({'message': 'Files moved successfully'})
+
+
 @app.route("/video", methods = ['POST', 'GET'])
 def video():
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     return render_template('video.html', image_files=image_files)
 
-@app.route("/ready_to_preview", methods=['POST','GET'])
+img_durations = []
+
+@app.route("/ready_to_preview", methods=['POST', 'GET'])
 def videopreview():
     durations = {}
+    global img_durations
+    img_durations.clear()
     if request.method == 'POST':
+        selected_song = request.form.get('song')
+        selected_transition=request.form.get('transition')
+        if selected_song:
+            audiofpath = selected_song.strip()
+        elif selected_song =="0":
+            audiofpath = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
+        if selected_transition:
+            selected_transition.strip()
         for key, value in request.form.items():
             if key.startswith('duration_'):
                 durations[key.split('_')[-1]] = float(value) if value else 2.0  # Default duration is 2 seconds if not specified
+                img_durations.append(durations[key.split('_')[-1]])
+    print("\n\n\n\n")
+    print(selected_transition)
+    print("\n\n\n\n")
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     path = './static/images'
     output = './static/videos'
     nameof_video = '/final.mp4'
-    audiofpath = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
     outputpath = output + nameof_video
     imageslist = os.listdir(path)
+
     if not imageslist:
         return render_template('video.html', video_html="<h1>No images found!</h1>")
 
@@ -259,36 +285,90 @@ def videopreview():
     image_arrays_resized = []
     for image_path in image_files:
         try:
-            img = Image.open(os.path.join(path, image_path))  
+            img = Image.open(os.path.join(path, image_path))  # Open image using full path
             resized_img = img.resize((640, 480))
             if resized_img.mode == 'RGBA':
                 resized_img = resized_img.convert('RGB')
             image_arrays_resized.append(np.array(resized_img))
         except (FileNotFoundError, IOError) as e:
-            print(f"Error loading image: {image_path} ")       
-    duration_per_frame = 3  
-    transition_duration = 0.5  
-    clips_with_transitions = []
-    for i in range(len(image_arrays_resized)):
-        clip = ImageClip(image_arrays_resized[i], duration=duration_per_frame)
-        if i > 0:
-            clip = fadein(clip, duration=transition_duration)
-        if i < len(image_arrays_resized) - 1:
-            clip = fadeout(clip, duration=transition_duration)
-        clips_with_transitions.append(clip)
+            print(f"Error loading image: {image_path} ")
 
+    duration_per_frame = 3
+    transition_duration = 0.3
+
+    clips_with_transitions = []
+
+    if not img_durations:
+        return f"Error: No image durations specified."
+
+
+    if selected_transition=="crossfade": 
+        print("\n\n\n","hello","\n\n\n\n")
+        for i in range(len(image_arrays_resized)):
+            clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+            if i > 0:
+                clip = fadein(clip, duration=transition_duration)
+            if i < len(image_arrays_resized) - 1:
+                clip = fadeout(clip, duration=transition_duration)
+            clips_with_transitions.append(clip)
+    elif selected_transition=="fade_in":
+        for i in range(len(image_arrays_resized)):
+            clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+            if i > 0:
+                clip = fadein(clip, duration=transition_duration)
+            clips_with_transitions.append(clip)
+    elif selected_transition=="fade_out":
+        for i in range(len(image_arrays_resized)):
+            clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+            if i < len(image_arrays_resized) - 1:
+                clip = fadeout(clip, duration=transition_duration)
+    elif selected_transition == "slidein":
+        clips_with_transitions = []
+        if len(image_arrays_resized) > 1:
+
+            for i in range(0, len(image_arrays_resized)):
+                clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+                clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_in, duration=transition_duration, side="left").fx(transfx.crossfadeout, duration=transition_duration)]))
+        else:
+            clip=ImageClip(image_arrays_resized[0],duration=img_durations[0])
+            clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_in,duration=transition_duration, side="left")]))
+    elif selected_transition == "slideout":
+        clips_with_transitions = []
+        if len(image_arrays_resized) > 1:
+
+            for i in range(0, len(image_arrays_resized)):
+                clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+                clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_out, duration=transition_duration, side="left").fx(transfx.crossfadein, duration=transition_duration)]))
+        else:
+            clip=ImageClip(image_arrays_resized[0],duration=img_durations[0])
+            clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_out,duration=transition_duration, side="left")]))
+        
+                
+        
+    final_clip = concatenate_videoclips(clips_with_transitions,method="compose")
+    audio_bg = AudioFileClip(audiofpath)
+    video_dur=final_clip.duration
+    audio_dur=audio_bg.duration
+    if(audio_dur>video_dur):
+        audio_dur=video_dur
+    audio_bg.duration=audio_dur
+    final_clip=final_clip.set_audio(audio_bg)
+    videofile = VideoFileClip(outputpath)
+    final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
     if os.path.exists(outputpath):
         video_html = f'''
         <div class="embed-responsive embed-responsive-16by9">
-            <video width="320" height="240" controls>
-                <source src="{url_for('static', filename='videos/final.mp4')}" type="video/mp4">
+            <video width="320" height="240" id="previewVideo" controls>
+                <source src="static/videos/final.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
         '''
     else:
         video_html = f'''<h1>Video will be previewed here</h1>'''
-    return render_template('video.html', video_html=video_html, image_files=image_files) 
+
+    return render_template('video.html', video_html=video_html, image_files=image_files)
+
 
 @app.route("/profile")
 def profile():
@@ -305,7 +385,7 @@ def profile():
     db6.close()
     connection6.close()
     return render_template("profile.html", username = username, name = Name["name"], mail = Mail["email"])
-  
+
 @app.route("/uploadimages", methods = ["POST"])
 def uploadimages():
     global images, username
@@ -356,7 +436,7 @@ def uploadimages():
             db.close()
             connection.close()
         return redirect("/home", 301)
-      
+    
 @app.route("/logout")
 def logout_and_delete():
     image_folder = 'static/images'
@@ -372,7 +452,7 @@ def logout_and_delete():
             print(f"Failed to delete {file_path}. Reason: {e}")
     
     # Delete the JWT token cookie
-    response = redirect("/", 301)
+    response = redirect("/")
     response.delete_cookie('jwt_token')
     
     # Delete all files in the renders folder
@@ -384,8 +464,11 @@ def logout_and_delete():
     username = ""
     
     return response
+
+
 @app.route("/decoy")
 def dekoi():
       return render_template("decoy.html")
-if __name__ == "__main__":
+  
+if __name__ == "_main_":
 	app.run(debug = True)
