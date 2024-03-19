@@ -7,7 +7,6 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-
 p {
   color: white;
 }
@@ -37,3 +36,66 @@ input {
   backdrop-filter: blur(100px);
 }
 
+#gallery img {
+  object-fit: contain;
+  max-width: 100%;
+}
+
+#gallery {
+  object-fit: contain;
+}
+
+.gal {
+  max-height: 800px;
+  overflow-y: auto;
+  background-color: rgba(174, 162, 162, 0.5);
+  border-radius: 10px;
+  box-shadow: -1px -1px 10px 10px rgba(26, 177, 227, 0.5);
+}
+
+.gal .col {
+  margin-bottom: 20px;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+input[type="checkbox"]:not(:checked) {
+  background-color: #fff;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #2196F3;
+  box-shadow: 0px 0px 10px rgba(33, 150, 243, 0.5);
+  transition: 0.3s ease-in-out;
+}
+
+input[type="checkbox"]:checked+label img {
+  box-shadow: 0 0 8px 4px rgb(236, 166, 200);
+}
+
+input[type="checkbox"]:checked:after {
+  content: "";
+  position: absolute;
+  top: 12%;
+  left: 23%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 15px;
+  border: solid #fff;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+input[type="checkbox"]:hover {
+  border-color: #7b36d5;
+}
