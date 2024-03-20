@@ -1,8 +1,6 @@
 from flask import Flask, render_template, request, redirect, flash, make_response, url_for, jsonify
 import json
 import jwt
-import pymysql
-import pymysql.cursors
 import os
 import datetime
 import hashlib
@@ -13,8 +11,9 @@ import shutil
 from moviepy.editor import *
 from moviepy.video.fx.all import fadein, fadeout
 import numpy as np
-dbusername = json.loads(open("dbcredentials.json").read())["username"]
-dbpassword = json.loads(open("dbcredentials.json").read())["password"]
+from sqlalchemy import text, create_engine
+
+engine = create_engine("cockroachdb://gautam:OgK0JBPMybWsoHdwFPPQfQ@existentia-8949.8nk.gcp-asia-southeast1.cockroachlabs.cloud:26257/existentia?sslmode=verify-full&sslrootcert=root.crt")
 
 def hashed(s):
 	pb = s.encode('utf-8')
@@ -23,25 +22,17 @@ def hashed(s):
 	return hex_dig
 
 def initialise_database():
-    connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
-    db = connection.cursor(pymysql.cursors.DictCursor)
-    db.execute("CREATE DATABASE IF NOT EXISTS existentia")
-    connection.commit()
-    db.execute("USE existentia")
-    connection.commit()
-    db.execute("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))")
-    connection.commit()
-    db.execute("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id INT, image LONGBLOB, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))")
-    connection.commit()
-    db.execute("CREATE TABLE IF NOT EXISTS audios(username VARCHAR(255), audio_id INT, audio LONGBLOB, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))")
-    connection.commit()
-    db.execute("SELECT * FROM users WHERE username = 'admin'")
-    x = db.fetchall()
-    if len(x) == 0:
-        db.execute("INSERT INTO users VALUES('Administrator', 'admin', %s, 'administrator@existentia.com')", (hashed("admin")))
-    connection.commit()
-    db.close()
-    connection.close()
+    with engine.connect() as db:
+        db.execute(text("CREATE TABLE IF NOT EXISTS users(name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), email VARCHAR(255), PRIMARY KEY(username))"))
+        db.commit()
+        db.execute(text("CREATE TABLE IF NOT EXISTS images(username VARCHAR(255), image_id SERIAL, image BYTEA, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))"))
+        db.commit()
+        db.execute(text("CREATE TABLE IF NOT EXISTS audios(username VARCHAR(255), audio_id SERIAL, audio BYTEA, metadata TEXT, FOREIGN KEY(username) REFERENCES users(username))"))
+        db.commit()
+        x = db.execute(text("SELECT * FROM users WHERE username = 'admin'")).mappings().all()
+        if len(x) == 0:
+            db.execute(text("INSERT INTO users VALUES('Administrator', 'admin', :p, 'administrator@existentia.com')"), {"p": hashed("admin")})
+        db.commit()
 
 initialise_database()
 
@@ -69,22 +60,15 @@ images = []
 audios = []
 
 def getfromdatabase():  
-	global users, images, audios
-	connection2 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
-	db2 = connection2.cursor(pymysql.cursors.DictCursor)
-	db2.execute("USE existentia")
-	connection2.commit()
-	db2.execute("SELECT * FROM users")
-	users = db2.fetchall()
-	connection2.commit()
-	db2.execute("SELECT username, image_id, metadata FROM images")
-	images = db2.fetchall()
-	connection2.commit()
-	db2.execute("SELECT username, audio_id, metadata FROM audios")
-	audios = db2.fetchall()
-	connection2.commit()
-	db2.close()
-	connection2.close()
+    global users, images, audios
+    with engine.connect() as db:
+        db.commit()
+        users = db.execute(text("SELECT * FROM users")).mappings().all()
+        db.commit()
+        images = db.execute(text("SELECT username, image_id, metadata FROM images")).mappings().all()
+        db.commit()
+        audios = db.execute(text("SELECT username, audio_id, metadata FROM audios")).mappings().all()
+        db.commit()
 
 getfromdatabase()
 
@@ -135,52 +119,43 @@ def signup():
         response.delete_cookie('jwt_token')
         return response
     return render_template("signup.html")
+
 @app.route("/home")
 def home():
-	if not os.path.exists("./static/renders"):
-		os.mkdir("./static/renders")
-	global username
-	connection3 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
-	db3 = connection3.cursor(pymysql.cursors.DictCursor)
-	db3.execute("USE existentia")
-	connection3.commit()
-	db3.execute("SELECT image_id FROM images WHERE username = %s", (username))
-	userimages = db3.fetchall()
-	connection3.commit()
-	db3.close()
-	connection3.close()
-	numfiles = len(os.listdir("./static/renders"))	
-	if numfiles != 0 :
-		for file in os.listdir("./static/renders"):
-			if file.startswith(username):
-				if(len(userimages) == numfiles):
-					return render_template("home.html", source_file = os.listdir("./static/renders"),username=username)
-				else:
-					erasedirectory("./static/renders")
-					return redirect("/home", 301)				
-			os.remove(f"./static/renders/{file}")
-	else:
-		if username == "":
-			return "null username"
-		connection4 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
-		db4 = connection4.cursor(pymysql.cursors.DictCursor)
-		db4.execute("USE existentia")
-		connection4.commit()
-		db4.execute("SELECT image, image_id from images WHERE username = %s", (username))
-		pictures = db4.fetchall()
-		connection4.commit()
-		db4.close()
-		connection4.close()
-		for picture in pictures:
-			img = Image.open(io.BytesIO(picture['image']))
-			img.save(f"./static/renders/{username}_{picture['image_id']}.png")
-	return render_template("home.html", source_file = os.listdir("./static/renders"))
+    if not os.path.exists("./static/renders"):
+        os.mkdir("./static/renders")
+    global username
+    with engine.connect() as db:
+        db.commit()
+        userimages = db.execute(text("SELECT image_id FROM images WHERE username = :u"), {"u": username}).mappings().all()
+        db.commit()
+    numfiles = len(os.listdir("./static/renders"))	
+    if numfiles != 0 :
+        for file in os.listdir("./static/renders"):
+            if file.startswith(username):
+                if(len(userimages) == numfiles):
+                    return render_template("home.html", source_file = os.listdir("./static/renders"),username=username)
+                else:
+                    erasedirectory("./static/renders")
+                    return redirect("/home", 301)				
+            os.remove(f"./static/renders/{file}")
+    else:
+        if username == "":
+            return "null username"
+        with engine.connect() as db:
+            pictures = db.execute(text("SELECT image, image_id from images WHERE username = :u"), {"u": username}).mappings().all()
+            db.commit()
+        for picture in pictures:
+            img = Image.open(io.BytesIO(picture['image']))
+            img.save(f"./static/renders/{username}_{picture['image_id']}.png")
+    return render_template("home.html", source_file = os.listdir("./static/renders"))
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
     if request.method == 'POST':
         global username
         username = request.form["username"]
+        print(username)
         password = request.form["password"]
         for user in users:
             if user["username"] == username and user["password"] == hashed(password):
@@ -193,29 +168,23 @@ def processloginrequest():
 	
 @app.route("/requestsignup", methods = ['POST'])
 def processsignuprequest():
-	global users
-	if request.method == 'POST':
-		username = request.form["username"]
-		password = request.form["password"]
-		email = request.form["email"]
-		name = request.form["name"]
-		for user in users:
-			if user["username"] == username:
-				flash("An account with this username already exists. Please choose a different username.")
-				return render_template("signup.html")
-		else:
-			connection5 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
-			db5 = connection5.cursor(pymysql.cursors.DictCursor)
-			db5.execute("USE existentia")
-			connection5.commit()
-			db5.execute("INSERT INTO users VALUES(%s, %s, %s, %s)", (name, username, hashed(password), email))
-			connection5.commit()
-			db5.execute("SELECT * FROM users")
-			users = db5.fetchall()
-			connection5.commit()
-			db5.close()
-			connection5.close()
-			return redirect("/login", 301)
+    global users
+    if request.method == 'POST':
+        username = request.form["username"]
+        password = request.form["password"]
+        email = request.form["email"]
+        name = request.form["name"]
+        for user in users:
+            if user["username"] == username:
+                flash("An account with this username already exists. Please choose a different username.")
+                return render_template("signup.html")
+        else:
+            with engine.connect() as db:
+                db.execute(text("INSERT INTO users VALUES(:n, :u, :p, :e)"), {"n": name, "u": username, "p": hashed(password), "e": email})
+                db.commit()
+                users = db.execute(text("SELECT * FROM users")).mappings().all()
+                db.commit()
+            return redirect("/login", 301)
 
 @app.route("/admin")
 def admin():
@@ -292,30 +261,27 @@ def videopreview():
     image_arrays_resized = []
     for image_path in image_files:
         try:
-            img = Image.open(os.path.join(path, image_path))  # Open image using full path
-            img2=img
+            img = Image.open(os.path.join(path, image_path))
             
             if selected_resolution == '1':
-                resized_img = img2.resize((426,240))
+                resized_img = img.resize((426,240))
             elif selected_resolution == '2':
-                resized_img = img2.resize((854,480))
+                resized_img = img.resize((854,480))
             elif selected_resolution == '3':
-                resized_img = img2.resize((1280,720))
+                resized_img = img.resize((1280,720))
             elif selected_resolution == '4':
-                resized_img = img2.resize((1920,1080))
+                resized_img = img.resize((1920,1080))
             
             if resized_img.mode == 'RGBA':
                 resized_img = resized_img.convert('RGB')
             image_arrays_resized.append(np.array(resized_img))
         except (FileNotFoundError, IOError) as e:
             print(f"Error loading image: {image_path} ")
-    duration_per_frame = 3
     transition_duration = 0.3
     clips_with_transitions = []
     if not img_durations:
         return f"Error: No image durations specified."
-    if selected_transition=="crossfade": 
-        print("\n\n\n","hello","\n\n\n\n")
+    if selected_transition=="crossfade":
         for i in range(len(image_arrays_resized)):
             clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
             if i > 0:
@@ -358,6 +324,7 @@ def videopreview():
     audio_dur=audio_bg.duration
     if(audio_dur>video_dur):
         audio_dur=video_dur
+
         audio_bg.duration=audio_dur
         
         final_clip=final_clip.set_audio(audio_bg)
@@ -383,24 +350,13 @@ def videopreview():
     </div>
     '''
 
-    
     return render_template('video.html', video_html=video_html, image_files=image_files)
 
 @app.route("/profile")
 def profile():
-    connection6 = pymysql.connect(host='localhost', user = dbusername, password = dbpassword)
-    db6 = connection6.cursor(pymysql.cursors.DictCursor)
-    db6.execute("USE existentia")
-    connection6.commit()
-    db6.execute("SELECT name FROM users WHERE username=%s",(username))
-    Name = db6.fetchone()
-    connection6.commit()
-    db6.execute("SELECT email FROM users WHERE username=%s",(username))
-    Mail = db6.fetchone()
-    connection6.commit()
-    db6.close()
-    connection6.close()
-    return render_template("profile.html", username = username, name = Name["name"], mail = Mail["email"])
+    with engine.connect() as db:
+        det = db.execute(text("SELECT name, email FROM users WHERE username = :u"), {"u": username}).mappings().first()
+    return render_template("profile.html", username = username, name = det["name"], mail = det["email"])
 
 @app.route("/uploadimages", methods = ["POST"])
 def uploadimages():
@@ -435,18 +391,11 @@ def uploadimages():
                 "transparent_color": img.info.get("transparency"),    
             }
             metadata_json = json.dumps(metadata)
-            connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
-            if not connection.open:
-                return "null connection"
-            db = connection.cursor(pymysql.cursors.DictCursor)
-            db.execute("USE existentia")
-            db.execute("INSERT INTO images VALUES(%s, %s, %s, %s)", (username, int(len(images)) + 1, blob, metadata_json))
-            connection.commit()
-            db.execute("SELECT username, image_id, metadata FROM images")
-            images = db.fetchall()
-            connection.commit()
-            db.close()
-            connection.close()
+            with engine.connect() as db:
+                db.execute(text("INSERT INTO images(username, image, metadata) VALUES(:u, :b, :m)"), {"u": username, "b": blob, "m": metadata_json})
+                db.commit()
+                images = db.execute(text("SELECT username, image_id, metadata FROM images")).mappings().all()
+                db.commit()
         return redirect("/home", 301)
 
 @app.route("/logout")
@@ -474,7 +423,7 @@ def logout_and_delete():
 
 @app.route("/decoy")
 def dekoi():
-      return render_template("decoy.html")
+    return render_template("decoy.html")
   
 if __name__ == "_main_":
-	app.run(debug = True)
+    app.run(port = os.environ["PORT"], host = '0.0.0.0')
