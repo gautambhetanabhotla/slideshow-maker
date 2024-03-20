@@ -155,6 +155,7 @@ def processloginrequest():
     if request.method == 'POST':
         global username
         username = request.form["username"]
+        print(username)
         password = request.form["password"]
         for user in users:
             if user["username"] == username and user["password"] == hashed(password):
@@ -253,30 +254,27 @@ def videopreview():
     image_arrays_resized = []
     for image_path in image_files:
         try:
-            img = Image.open(os.path.join(path, image_path))  # Open image using full path
-            img2=img
+            img = Image.open(os.path.join(path, image_path))
             
             if selected_resolution == '1':
-                resized_img = img2.resize((426,240))
+                resized_img = img.resize((426,240))
             elif selected_resolution == '2':
-                resized_img = img2.resize((854,480))
+                resized_img = img.resize((854,480))
             elif selected_resolution == '3':
-                resized_img = img2.resize((1280,720))
+                resized_img = img.resize((1280,720))
             elif selected_resolution == '4':
-                resized_img = img2.resize((1920,1080))
+                resized_img = img.resize((1920,1080))
             
             if resized_img.mode == 'RGBA':
                 resized_img = resized_img.convert('RGB')
             image_arrays_resized.append(np.array(resized_img))
         except (FileNotFoundError, IOError) as e:
             print(f"Error loading image: {image_path} ")
-    duration_per_frame = 3
     transition_duration = 0.3
     clips_with_transitions = []
     if not img_durations:
         return f"Error: No image durations specified."
-    if selected_transition=="crossfade": 
-        print("\n\n\n","hello","\n\n\n\n")
+    if selected_transition=="crossfade":
         for i in range(len(image_arrays_resized)):
             clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
             if i > 0:
@@ -321,13 +319,12 @@ def videopreview():
         audio_dur=video_dur
     audio_bg.duration=audio_dur
     final_clip=final_clip.set_audio(audio_bg)
-    
     final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
     if os.path.exists(outputpath):
         video_html = f'''
-        <div class="embed-responsive embed-responsive-16by9">
-            <video width="320" height="240" controls>
-                <source src="{url_for('static', filename='videos/final.mp4')}" type="video/mp4">
+            <div class="embed-responsive embed-responsive-16by9">
+                <video width="320" height="240" controls>
+                    <source src="{url_for('static', filename='videos/final.mp4')}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
