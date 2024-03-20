@@ -46,6 +46,7 @@ def initialise_database():
 initialise_database()
 
 app = Flask(__name__)
+
 if os.path.exists("./uploads"):
 	app.config['UPLOAD_FOLDER'] = "./uploads"
 else:
@@ -57,12 +58,16 @@ if not os.path.exists("./static/videos"):
      
 if not os.path.exists("./static/images"):
     os.mkdir("./static/images")
+
 if not os.path.exists("./static/renders"):
     os.mkdir("./static/renders")
+
 app.secret_key = "SECRET_KEY_EXISTENTIA"
+
 users = []
 images = []
 audios = []
+
 def getfromdatabase():  
 	global users, images, audios
 	connection2 = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
@@ -80,13 +85,15 @@ def getfromdatabase():
 	connection2.commit()
 	db2.close()
 	connection2.close()
+
 getfromdatabase()
+
 username = ""
 
 def erasedirectory(path):
 	for file in os.listdir(path):
 		os.remove(path + "/" + file)
-  
+
 @app.route("/")
 def rootpage():
 	return render_template("root.html")
@@ -128,7 +135,6 @@ def signup():
         response.delete_cookie('jwt_token')
         return response
     return render_template("signup.html")
-
 @app.route("/home")
 def home():
 	if not os.path.exists("./static/renders"):
@@ -211,6 +217,7 @@ def processsignuprequest():
 			db5.close()
 			connection5.close()
 			return redirect("/login", 301)
+
 @app.route("/admin")
 def admin():
     global users, images, audios
@@ -223,19 +230,17 @@ def admin():
                 nums[index] += 1
     return render_template("admin.html", userlist = users, numimages = nums)
     # return [users, images, audios]
+
 @app.route('/move_files', methods=['POST'])
 def move_files():
     data = request.get_json()
     files = data.get('files', [])
     destination_folder = './static/images'  # Specify the destination folder
-    
     for file_name in files:
         source_path = os.path.join('./static/renders', file_name)  # Specify the source folder
         destination_path = os.path.join(destination_folder, file_name)
         shutil.move(source_path, destination_path)
-    
     return jsonify({'message': 'Files moved successfully'})
-
 
 @app.route("/video", methods = ['POST', 'GET'])
 def video():
@@ -253,6 +258,7 @@ def videopreview():
     if request.method == 'POST':
         selected_song = request.form.get('song')
         selected_transition=request.form.get('transition')
+        selected_resolution = request.form.get('resolution') 
         if selected_song:
             audiofpath = selected_song.strip()
         elif selected_song =="0":
@@ -263,7 +269,6 @@ def videopreview():
             if key.startswith('duration_'):
                 durations[key.split('_')[-1]] = float(value) if value else 2.0  # Default duration is 2 seconds if not specified
                 img_durations.append(durations[key.split('_')[-1]])
-
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     path = './static/images'
@@ -271,37 +276,37 @@ def videopreview():
     nameof_video = '/final.mp4'
     outputpath = output + nameof_video
     imageslist = os.listdir(path)
-
     if not imageslist:
         return render_template('video.html', video_html="<h1>No images found!</h1>")
-
     j = 0
     for i in imageslist:
         i = path + '/' + i
         imageslist[j] = i
         j += 1
-
     image_arrays_resized = []
     for image_path in image_files:
         try:
             img = Image.open(os.path.join(path, image_path))
-            resized_img = img.resize((640, 480))
+            
+            if selected_resolution == '1':
+                resized_img = img.resize((426,240))
+            elif selected_resolution == '2':
+                resized_img = img.resize((854,480))
+            elif selected_resolution == '3':
+                resized_img = img.resize((1280,720))
+            elif selected_resolution == '4':
+                resized_img = img.resize((1920,1080))
+            
             if resized_img.mode == 'RGBA':
                 resized_img = resized_img.convert('RGB')
             image_arrays_resized.append(np.array(resized_img))
         except (FileNotFoundError, IOError) as e:
             print(f"Error loading image: {image_path} ")
-
     transition_duration = 0.3
-
     clips_with_transitions = []
-
     if not img_durations:
         return f"Error: No image durations specified."
-
-
-    if selected_transition=="crossfade": 
-        print("\n\n\n","hello","\n\n\n\n")
+    if selected_transition=="crossfade":
         for i in range(len(image_arrays_resized)):
             clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
             if i > 0:
@@ -323,7 +328,6 @@ def videopreview():
     elif selected_transition == "slidein":
         clips_with_transitions = []
         if len(image_arrays_resized) > 1:
-
             for i in range(0, len(image_arrays_resized)):
                 clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
                 clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_in, duration=transition_duration, side="left").fx(transfx.crossfadeout, duration=transition_duration)]))
@@ -333,16 +337,12 @@ def videopreview():
     elif selected_transition == "slideout":
         clips_with_transitions = []
         if len(image_arrays_resized) > 1:
-
             for i in range(0, len(image_arrays_resized)):
                 clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
                 clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_out, duration=transition_duration, side="left").fx(transfx.crossfadein, duration=transition_duration)]))
         else:
             clip=ImageClip(image_arrays_resized[0],duration=img_durations[0])
-            clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_out,duration=transition_duration, side="left")]))
-        
-                
-        
+            clips_with_transitions.append(CompositeVideoClip([clip.fx(transfx.slide_out,duration=transition_duration, side="left")]))   
     final_clip = concatenate_videoclips(clips_with_transitions,method="compose")
     audio_bg = AudioFileClip(audiofpath)
     video_dur=final_clip.duration
@@ -354,18 +354,16 @@ def videopreview():
     final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
     if os.path.exists(outputpath):
         video_html = f'''
-        <div>
-            <video width="500" height="360" id="previewVideo" controls>
-                <source src="static/videos/final.mp4" type="video/mp4">
+            <div class="embed-responsive embed-responsive-16by9">
+                <video width="320" height="240" controls>
+                    <source src="{url_for('static', filename='videos/final.mp4')}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
         '''
     else:
         video_html = f'''<h1>Video will be previewed here</h1>'''
-
     return render_template('video.html', video_html=video_html, image_files=image_files)
-
 
 @app.route("/profile")
 def profile():
@@ -391,14 +389,11 @@ def uploadimages():
         if 'file' not in request.files:
             flash('No file part')
             return redirect("/home", 301)
-        
         files = request.files.getlist("file")
         # return str(len(files))
-        
         if len(files) == 0:
             flash('No selected file')
             return redirect("/home", 301)
-        
         for file in files:
             if file.filename == '':
                 continue
@@ -419,7 +414,6 @@ def uploadimages():
                 "transparent_color": img.info.get("transparency"),    
             }
             metadata_json = json.dumps(metadata)
-            
             connection = pymysql.connect(host='localhost', user=dbusername, password=dbpassword)
             if not connection.open:
                 return "null connection"
@@ -433,11 +427,10 @@ def uploadimages():
             db.close()
             connection.close()
         return redirect("/home", 301)
-    
+
 @app.route("/logout")
 def logout_and_delete():
     image_folder = 'static/images'
-    
     for filename in os.listdir(image_folder):
         file_path = os.path.join(image_folder, filename)
         try:
@@ -447,21 +440,16 @@ def logout_and_delete():
                 shutil.rmtree(file_path)
         except Exception as e:
             print(f"Failed to delete {file_path}. Reason: {e}")
-    
     # Delete the JWT token cookie
     response = redirect("/")
     response.delete_cookie('jwt_token')
-    
     # Delete all files in the renders folder
     erasedirectory("./static/renders")
     erasedirectory("./static/images")
-    
     # Reset the global variable
     global username
     username = ""
-    
     return response
-
 
 @app.route("/decoy")
 def dekoi():

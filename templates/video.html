@@ -19,28 +19,18 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
     <title>Video page</title>
-    <style>
-        h1,
-        h2,
-        h3,
-        h4 {
-            color: white;
-            text-align: center;
-        }
-    </style>
 </head>
 
 <body>
-    <div class="bg"><img src="{{ url_for('static', filename='icons/space.png') }}" alt="Space"
-            style="height: 100%; width: auto;"></img></div>
+    <div class="bg"><img src="{{ url_for('static', filename='icons/space.png') }}" alt="Space"></img></div>
     <br><br><br>
     <div>
         <div class="container text-center">
             <div class="row d-flex align-items-center">
                 <form method="post" action="/ready_to_preview">
-                    <div class="container row gal row d-flex align-items-center">
+                    <div class="container row gal">
                         {% for file_name in image_files %}
-                        <div class="col-4 p-3 row d-flex align-items-center">
+                        <div class="col-4 p-3">
                             <img src="{{ url_for('static', filename='images/' + file_name) }}"
                                 alt="Description of the image" style="width: 300px;height: auto;"
                                 class="rounded-4 photo">
@@ -83,7 +73,6 @@
                         </div>
                     </div>
                     <div>
-
                         <div class="container text-center">
                             <div class="d-flex flex-row justify-content-center p-4">
                                 <div>
@@ -122,53 +111,49 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="container text-center">
-
-                            <input type="submit" class="btn btn-outline-light btn-lg">
+                    </div>
+                    <div class="container text-center">
+                        <div class="d-flex flex-row justify-content-center p-4">
+                            <div>
+                                <label for="resolution" class="mt-3">
+                                    <h4>Choose Resolution :</h4>
+                                </label>
+                            </div>
+                            <div>
+                                <select id="resolution" name="resolution" class="form-select p-3 wid-3">
+                                    <option value="1" selected>240p</option>
+                                    <option value="2">480p</option>
+                                    <option value="3">720p</option>
+                                    <option value="4">1080p</option>
+                                </select>
+                            </div>
                         </div>
-
-
+                    </div>
+                    <div class="container text-center">
+                        <input type="submit" class="btn btn-outline-light btn-lg">
+                    </div>
                 </form>
             </div>
         </div>
-
-
     </div>
     <h2 class="mt-5">Video preview</h2>
     <div class="container text-center">
         <div class="row">
-            <div>
-                {{ video_html | safe }}
+            <div class="col-xs-12">
+                <video controls width="500">
+                    <source src="./static/videos/final.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
             </div>
         </div>
     </div>
     <h2>Select Resolution</h2>
     <div class="output_settings">
-        <form action="/action_page.php">
-            <div class="container text-center">
-                <div class="d-flex flex-row justify-content-center p-4">
-                    <div>
-                        <label for="song" class="mt-3">
-                            <h4>Choose Resolution :</h4>
-                        </label>
-                    </div>
-                    <div>
-                        <select id="song" name="song" class="form-select p-3 wid-3">
-                            <option value="1" selected>240p</option>
-                            <option value="2">480p</option>
-                            <option value="3">720p</option>
-                            <option value="4">1080p</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-        </form>
     </div>
     <h2>Download Video</h2>
     <div class="extract">
         <button class="music_selection_button">Download</button>
+    </div>
     </div>
 </body>
 
