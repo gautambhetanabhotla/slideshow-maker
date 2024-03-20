@@ -1,5 +1,4 @@
 flask
-jwt
 sqlalchemy
 datetime
 moviepy
