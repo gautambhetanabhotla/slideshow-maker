@@ -134,7 +134,9 @@ def home():
         for file in os.listdir("./static/renders"):
             if file.startswith(username):
                 if(len(userimages) == numfiles):
-                    return render_template("home.html", source_file = os.listdir("./static/renders"),username=username,num_images=len(os.listdir("./static/renders")))
+
+                    return render_template("home.html", source_file = os.listdir("./static/renders"),username=username, num_images = len(os.listdir("./static/renders")))
+
                 else:
                     erasedirectory("./static/renders")
                     return redirect("/home", 301)				
@@ -148,7 +150,9 @@ def home():
         for picture in pictures:
             img = Image.open(io.BytesIO(picture['image']))
             img.save(f"./static/renders/{username}_{picture['image_id']}.png")
-    return render_template("home.html", source_file = os.listdir("./static/renders"),username=username,num_images=len(os.listdir("./static/renders")))
+
+    return render_template("home.html", source_file = os.listdir("./static/renders"), username = username, num_images = len(os.listdir("./static/renders")))
+
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
