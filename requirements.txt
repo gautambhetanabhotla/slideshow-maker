@@ -1,5 +1,7 @@
 flask
 jwt
-pymysql
+sqlalchemy
 datetime
+moviepy
+numpy
 moviepy
