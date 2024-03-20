@@ -7,3 +7,9 @@ numpy
 moviepy
 sqlalchemy-cockroachdb
 psycopg2
+json
+os
+hashlib
+PIL
+io
+shutil
