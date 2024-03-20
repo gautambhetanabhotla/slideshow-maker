@@ -24,3 +24,4 @@
 - User, image and audio data is now stored on an online PostgreSQL database.
 - The web app is now hosted on Render.
 - On selecting images, you will be redirected to a page where you can add audio to the video, set individual durations of each of the images, and choose a transition effect between the images.
+- On clicking the "Upload" button on the home page, you will have to manually reload the page for the results to show. Clicking the button multiple times before refreshing will upload the same set of images multiple times.
