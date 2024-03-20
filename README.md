@@ -14,6 +14,13 @@
 
 # Milestone 2
 - Passwords are stored in the database in SHSA256 hashed format.
-- User authentication is now token-based (more specifically, JSON Web tokens).
-- User, image and audio data is stored in a local MySQL database, on the hosting server.
+- User authentication is now token-based (JSON Web tokens).
+- User, image and audio data is stored in a local MySQL database.
 - The hosting which was supposed to be done on flask was implemented during milestone 1 itself.
+
+<br>
+
+# Milestone 3
+- User, image and audio data is now stored on an online PostgreSQL database.
+- The web app is now hosted on Render.
+- On selecting images, you will be redirected to a page where you can add audio to the video, set individual durations of each of the images, and choose a transition effect between the images.
