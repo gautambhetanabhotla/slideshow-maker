@@ -5,3 +5,4 @@ moviepy
 numpy
 sqlalchemy-cockroachdb
 psycopg2
+pyjwt
