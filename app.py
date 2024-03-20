@@ -134,7 +134,7 @@ def home():
         for file in os.listdir("./static/renders"):
             if file.startswith(username):
                 if(len(userimages) == numfiles):
-                    return render_template("home.html", source_file = os.listdir("./static/renders"),username=username)
+                    return render_template("home.html", source_file = os.listdir("./static/renders"),username=username,num_images=len(os.listdir("./static/renders")))
                 else:
                     erasedirectory("./static/renders")
                     return redirect("/home", 301)				
@@ -148,7 +148,7 @@ def home():
         for picture in pictures:
             img = Image.open(io.BytesIO(picture['image']))
             img.save(f"./static/renders/{username}_{picture['image_id']}.png")
-    return render_template("home.html", source_file = os.listdir("./static/renders"))
+    return render_template("home.html", source_file = os.listdir("./static/renders"),username=username,num_images=len(os.listdir("./static/renders")))
 
 @app.route("/requestlogin", methods = ['POST'])
 def processloginrequest():
@@ -224,8 +224,7 @@ img_durations = []
 @app.route("/ready_to_preview", methods=['POST', 'GET'])
 def videopreview():
     global username
-    if username == "":
-        return "null username"
+    
     durations = {}
     global img_durations
     img_durations.clear()
@@ -296,10 +295,17 @@ def videopreview():
                 clip = fadein(clip, duration=transition_duration)
             clips_with_transitions.append(clip)
     elif selected_transition=="fade_out":
-        for i in range(len(image_arrays_resized)):
-            clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
-            if i < len(image_arrays_resized) - 1:
-                clip = fadeout(clip, duration=transition_duration)
+        if(len(image_arrays_resized)==1):
+            clip = ImageClip(image_arrays_resized[0], duration=img_durations[0])
+            clip = fadeout(clip, duration=transition_duration)
+            clips_with_transitions.append(clip)
+        else:
+            for i in range(len(image_arrays_resized)):
+                clip = ImageClip(image_arrays_resized[i], duration=img_durations[i])
+                if i < len(image_arrays_resized) - 1:
+                    clip = fadeout(clip, duration=transition_duration)
+                clips_with_transitions.append(clip)
+
     elif selected_transition == "slidein":
         clips_with_transitions = []
         if len(image_arrays_resized) > 1:
@@ -342,12 +348,24 @@ def videopreview():
     final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
   
     video_html = f'''
+    <div class="video_preview">
+    <h2 class="mt-5">Video preview</h2>
     <div class="embed-responsive embed-responsive-16by9">
-        <video width="320" height="240" controls>
+        <video width="600" height="400" controls>
             <source src="{url_for('static', filename='videos/final.mp4')}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
+    <div>
+    <h2 class="mb-3">Download Video</h2>
+    <div class="container text-center">
+        <a href="./static/videos/final.mp4" download>
+            <button class="btn btn-outline-light btn-lg" >Download</button>
+        </a>
+    </div>
+    <br>
+    <br>
+    <br>
     '''
 
     return render_template('video.html', video_html=video_html, image_files=image_files)
