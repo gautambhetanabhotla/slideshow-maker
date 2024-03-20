@@ -407,4 +407,4 @@ def dekoi():
     return render_template("decoy.html")
   
 if __name__ == "_main_":
-    app.run(debug = True)
+    app.run()
