@@ -212,6 +212,9 @@ def move_files():
 
 @app.route("/video", methods = ['POST', 'GET'])
 def video():
+    global username
+    if username == "":
+        return "null username"
     image_folder = './static/images'
     image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
     return render_template('video.html', image_files=image_files)
@@ -220,6 +223,9 @@ img_durations = []
 
 @app.route("/ready_to_preview", methods=['POST', 'GET'])
 def videopreview():
+    global username
+    if username == "":
+        return "null username"
     durations = {}
     global img_durations
     img_durations.clear()
@@ -227,10 +233,11 @@ def videopreview():
         selected_song = request.form.get('song')
         selected_transition=request.form.get('transition')
         selected_resolution = request.form.get('resolution') 
-        if selected_song:
-            audiofpath = selected_song.strip()
-        elif selected_song =="0":
+        if selected_song =="0":
             audiofpath = './static/music/Happy_birthday_to_you_MIDI(chosic.com).mp3'
+        elif selected_song:
+            audiofpath = selected_song.strip()
+        
         if selected_transition:
             selected_transition.strip()
         for key, value in request.form.items():
@@ -317,20 +324,32 @@ def videopreview():
     audio_dur=audio_bg.duration
     if(audio_dur>video_dur):
         audio_dur=video_dur
-    audio_bg.duration=audio_dur
-    final_clip=final_clip.set_audio(audio_bg)
-    final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
-    if os.path.exists(outputpath):
-        video_html = f'''
-            <div class="embed-responsive embed-responsive-16by9">
-                <video width="320" height="240" controls>
-                    <source src="{url_for('static', filename='videos/final.mp4')}" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-        '''
+
+        audio_bg.duration=audio_dur
+        
+        final_clip=final_clip.set_audio(audio_bg)
     else:
-        video_html = f'''<h1>Video will be previewed here</h1>'''
+        num_loops = int(video_dur / audio_dur)
+        audio_clips = [audio_bg] * num_loops 
+        leftover_duration = video_dur - (num_loops * audio_dur) 
+        if leftover_duration > 0:  
+            partial_audio_clip = audio_bg.subclip(0, leftover_duration)
+            audio_clips.append(partial_audio_clip)
+        looped_audio = concatenate_audioclips(audio_clips)
+        final_clip = final_clip.set_audio(looped_audio)
+
+    
+    final_clip.write_videofile(outputpath, fps=24, remove_temp=True)
+  
+    video_html = f'''
+    <div class="embed-responsive embed-responsive-16by9">
+        <video width="320" height="240" controls>
+            <source src="{url_for('static', filename='videos/final.mp4')}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    '''
+
     return render_template('video.html', video_html=video_html, image_files=image_files)
 
 @app.route("/profile")
