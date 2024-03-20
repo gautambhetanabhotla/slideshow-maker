@@ -13,6 +13,8 @@ from moviepy.video.fx.all import fadein, fadeout
 import numpy as np
 from sqlalchemy import text, create_engine
 
+poort = os.environ["PORT"]
+
 engine = create_engine("cockroachdb://gautam:OgK0JBPMybWsoHdwFPPQfQ@existentia-8949.8nk.gcp-asia-southeast1.cockroachlabs.cloud:26257/existentia?sslmode=verify-full&sslrootcert=root.crt")
 
 def hashed(s):
@@ -407,4 +409,4 @@ def dekoi():
     return render_template("decoy.html")
   
 if __name__ == "_main_":
-    app.run(port = 10000)
+    app.run(port = poort, host = '0.0.0.0')
