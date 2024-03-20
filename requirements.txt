@@ -5,3 +5,4 @@ datetime
 moviepy
 numpy
 moviepy
+sqlalchemy-cockroachdb
