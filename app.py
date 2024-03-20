@@ -13,7 +13,7 @@ from moviepy.video.fx.all import fadein, fadeout
 import numpy as np
 from sqlalchemy import text, create_engine
 
-engine = create_engine("cockroachdb://gautam:OgK0JBPMybWsoHdwFPPQfQ@existentia-8949.8nk.gcp-asia-southeast1.cockroachlabs.cloud:26257/existentia?sslmode=verify-full")
+engine = create_engine("cockroachdb://gautam:OgK0JBPMybWsoHdwFPPQfQ@existentia-8949.8nk.gcp-asia-southeast1.cockroachlabs.cloud:26257/existentia?sslmode=verify-full&sslrootcert=root.crt")
 
 def hashed(s):
 	pb = s.encode('utf-8')
