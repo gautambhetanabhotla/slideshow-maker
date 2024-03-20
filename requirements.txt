@@ -6,3 +6,4 @@ moviepy
 numpy
 moviepy
 sqlalchemy-cockroachdb
+psycopg2
